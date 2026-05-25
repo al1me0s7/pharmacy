@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width:800px;margin:40px auto;padding:20px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+    <h1>Додати новий лік</h1>
+    <a href="{{ url_for('admin_medicines.admin_medicines') }}" class="btn" style="background:#16a34a;color:white;">←</a>
+  </div>
+
+  <div style="background:white;border:2px solid #16a34a;border-radius:12px;padding:30px;box-shadow:0 2px 8px rgba(22,163,74,0.1);">
+    <form method="post" enctype="multipart/form-data">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Назва препарату *</label>
+          <input type="text" name="name" required style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+        
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Виробник *</label>
+          <select name="manufacturer_id" required style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+            <option value="">Оберіть виробника</option>
+            {% for mf in manufacturers %}
+              <option value="{{ mf.manufacturer_id }}">{{ mf.manufacturer_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Категорія *</label>
+          <select name="category_id" required style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+            <option value="">Оберіть категорію</option>
+            {% for cat in categories %}
+              <option value="{{ cat.category_id }}">{{ cat.category_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Ціна (грн) *</label>
+          <input type="number" name="price" step="0.01" required style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Запас (шт.)</label>
+          <input type="number" name="quantity_in_stock" step="1" min="0" value="0" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Активна речовина</label>
+          <input type="text" name="active_substance" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+
+
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Дозування</label>
+          <input type="text" name="dosage_value" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Форма випуску</label>
+          <input type="text" name="dosage_form" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Термін придатності</label>
+          <input type="date" name="expiration_date" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Фото</label>
+          <input type="file" name="image" accept="image/*" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Опис</label>
+        <textarea name="description" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;min-height:80px;"></textarea>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Протипоказання</label>
+        <textarea name="contraindications" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;min-height:80px;"></textarea>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Склад</label>
+        <textarea name="composition" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;min-height:80px;"></textarea>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Інструкції з застосування</label>
+        <textarea name="usage_instructions" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;min-height:80px;"></textarea>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Умови зберігання</label>
+        <textarea name="storage_conditions" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;min-height:80px;"></textarea>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:flex;align-items:center;cursor:pointer;">
+          <input type="checkbox" name="prescription_required" style="width:20px;height:20px;cursor:pointer;accent-color:#16a34a;margin-right:10px;">
+          <span style="font-weight:bold;color:#16a34a;">Потребує рецепту</span>
+        </label>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Аптеки та ціни</label>
+        <div id="pharmacies-container">
+        </div>
+        <button type="button" id="add-pharmacy-btn" style="background:#16a34a;color:white;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;margin-top:10px;">+ Додати аптеку</button>
+      </div>
+
+      <div style="display:flex;gap:12px;">
+        <button type="submit" class="btn" style="background:#16a34a;color:white;padding:12px 30px;border:none;border-radius:6px;font-weight:bold;cursor:pointer;flex:1;">Додати препарат</button>
+        <a href="{{ url_for('admin_medicines.admin_medicines') }}" class="btn" style="background:#e5e7eb;color:#333;padding:12px 30px;border:none;border-radius:6px;font-weight:bold;cursor:pointer;text-decoration:none;text-align:center;flex:1;">Скасувати</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('pharmacies-container');
+    const addBtn = document.getElementById('add-pharmacy-btn');
+    let pharmacyCount = 0;
+
+    // це дані, передані з бекенду
+    let cities = {{ cities|tojson }};
+    let pharmacies = {{ pharmacies|tojson }};
+
+    function createPharmacyEntry() {
+        pharmacyCount++;
+        const entry = document.createElement('div');
+        entry.className = 'pharmacy-entry';
+        entry.style.cssText = 'display:flex;gap:10px;align-items:center;margin-bottom:10px;padding:10px;border:1px solid #e6e9ef;border-radius:6px;';
+        
+        entry.innerHTML = `
+            <select name="cities[]" style="width:150px;padding:8px;border:1px solid #e6e9ef;border-radius:6px;" onchange="updatePharmacies(this, ${pharmacyCount})">
+                <option value="">Оберіть місто</option>
+                ${cities.map(city => `<option value="${city.city_id}">${city.city_name}</option>`).join('')}
+            </select>
+            <select name="pharmacy_ids[]" style="width:200px;padding:8px;border:1px solid #e6e9ef;border-radius:6px;" id="pharmacy-${pharmacyCount}">
+                <option value="">Оберіть аптеку</option>
+            </select>
+            <input type="number" name="inventory_prices[]" step="0.01" placeholder="Ціна" style="width:100px;padding:8px;border:1px solid #e6e9ef;border-radius:6px;">
+            <button type="button" onclick="removePharmacy(this)" style="background:#ef4444;color:white;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;">×</button>
+        `;
+        
+        container.appendChild(entry);
+        return entry;
+    }
+
+    window.updatePharmacies = function(select, count) {
+        const cityId = select.value;
+        const pharmacySelect = document.getElementById(`pharmacy-${count}`);
+
+        pharmacySelect.innerHTML = '<option value="">Оберіть аптеку</option>';
+
+        const cityPharmacies = pharmacies.filter(p => p.city_id == cityId);
+        cityPharmacies.forEach(pharmacy => {
+            const option = document.createElement('option');
+            option.value = pharmacy.pharmacy_id;
+            option.textContent = pharmacy.pharmacy_name;
+            pharmacySelect.appendChild(option);
+        });
+    };
+
+    window.removePharmacy = function(btn) {
+        btn.closest('.pharmacy-entry').remove();
+    };
+
+    if (addBtn) {
+        addBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            createPharmacyEntry();
+        });
+    }
+});
+</script>
+{% endblock %}

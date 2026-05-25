@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+  <h2>Оформити бронювання</h2>
+  
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- Ліва колонка: товари -->
+    <div>
+      <h3>Товари в бронюванні</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #f3f4f6; border-bottom: 2px solid #ddd;">
+            <th style="padding: 10px; text-align: left;">Препарат</th>
+            <th style="padding: 10px; text-align: right;">Кл.</th>
+            <th style="padding: 10px; text-align: right;">Сума</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+            <tr style="border-bottom: 1px solid #eee;">
+              <td style="padding: 10px;">{{ item.medicine.name[:40] }}</td>
+              <td style="padding: 10px; text-align: right;">{{ item.quantity }}</td>
+              <td style="padding: 10px; text-align: right; font-weight: bold;">{{ "%.2f"|format(item.subtotal) }} грн</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      
+      <div style="padding: 15px; background: #f0fdf4; border-radius: 8px; margin-top: 15px; border: 2px solid #059669;">
+        <div style="font-size: 18px; font-weight: bold; text-align: right;">
+          Всього: {{ "%.2f"|format(total) }} грн
+        </div>
+      </div>
+    </div>
+    
+    <!-- Права колонка: форма оформлення -->
+    <div>
+      <form method="POST" style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <h3>Вибір аптеки</h3>
+        
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: bold;">Місто:</label>
+          <select id="city-select" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+            <option value="">Всі міста</option>
+            {% for city in cities %}
+              <option value="{{ city.city_id }}">{{ city.city_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: bold;">Аптека:</label>
+          <select name="pharmacy" id="pharmacy-select" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" required>
+            <option value="">Оберіть аптеку</option>
+            {% for pharm in pharmacies %}
+              <option value="{{ pharm.pharmacy_id }}" data-city="{{ pharm.city_id }}">
+                {{ pharm.pharmacy_name }} — {{ pharm.address }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #dc2626;">
+          <p style="margin: 0; color: #991b1b; font-size: 14px;">
+            <strong>ВАЖЛИВО:</strong> Всі препарати буде заброньовано на <strong>самовивіз</strong> з обраної аптеки. Термін отримання - <strong>24 години</strong>.
+          </p>
+        </div>
+        
+        <button type="submit" class="btn primary" style="width: 100%; padding: 12px; font-size: 16px; font-weight: bold;">
+          Підтвердити бронювання
+        </button>
+        
+        <a href="/bookings/cart" style="display: block; text-align: center; margin-top: 10px; color: #0066cc; text-decoration: none;">← Назад до кошика</a>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const citySelect = document.getElementById('city-select');
+  const pharmacySelect = document.getElementById('pharmacy-select');
+  const pharmacyOptions = Array.from(pharmacySelect.querySelectorAll('option[data-city]'));
+  
+  citySelect.addEventListener('change', function() {
+    const selectedCity = this.value;
+
+    pharmacySelect.value = '';
+
+    pharmacyOptions.forEach(option => {
+      if (!selectedCity || option.getAttribute('data-city') === selectedCity) {
+        option.style.display = '';
+      } else {
+        option.style.display = 'none';
+      }
+    });
+  });
+</script>
+{% endblock %}

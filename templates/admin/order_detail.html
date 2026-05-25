@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width:1000px;margin:40px auto;padding:20px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+    <h1>Деталі замовлення #{{ order.order_id }}</h1>
+    <a href="{{ url_for('admin_orders.admin_orders') }}" class="btn" style="background:#16a34a;color:white;">Назад до замовлень</a>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 2fr;gap:30px;">
+    <div style="background:white;border:2px solid #16a34a;border-radius:12px;padding:20px;">
+      <h3 style="color:#16a34a;margin-bottom:15px;">Інформація про замовлення</h3>
+      <p><strong>Клієнт:</strong> {{ order.full_name }}</p>
+      <p><strong>Email:</strong> {{ order.email }}</p>
+      <p><strong>Телефон:</strong> {{ order.phone_number }}</p>
+      <p><strong>Адреса:</strong> {{ order.address }}</p>
+      <p><strong>Дата замовлення:</strong> {{ order.order_date.strftime('%d.%m.%Y %H:%M') }}</p>
+      <p><strong>Статус:</strong> 
+        <span style="color:{% if order.status == 'pending' %}#f59e0b{% elif order.status == 'confirmed' %}#3b82f6{% elif order.status == 'preparing' %}#8b5cf6{% elif order.status == 'ready' %}#10b981{% elif order.status == 'delivered' %}#16a34a{% else %}#ef4444{% endif %}">
+          {{ {'pending':'Очікує', 'confirmed':'Підтверджено', 'preparing':'Готується', 'ready':'Готове', 'delivered':'Доставлено', 'cancelled':'Скасовано'}.get(order.status, order.status) }}
+        </span>
+      </p>
+
+      <form method="POST" action="{{ url_for('admin_orders.admin_order_status', oid=order.order_id) }}" style="margin-top:20px;">
+        <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Змінити статус:</label>
+        <select name="status" style="width:100%;padding:8px;border:1px solid #e6e9ef;border-radius:6px;margin-bottom:10px;">
+          <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Очікує</option>
+          <option value="confirmed" {% if order.status == 'confirmed' %}selected{% endif %}>Підтверджено</option>
+          <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>Готується</option>
+          <option value="ready" {% if order.status == 'ready' %}selected{% endif %}>Готове</option>
+          <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Доставлено</option>
+          <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Скасовано</option>
+        </select>
+        <button type="submit" style="background:#16a34a;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Оновити статус</button>
+      </form>
+    </div>
+
+    <div style="background:white;border:2px solid #16a34a;border-radius:12px;padding:20px;">
+      <h3 style="color:#16a34a;margin-bottom:15px;">Товари в замовленні</h3>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:2px solid #e6e9ef;">
+              <th style="padding:8px;text-align:left;">Препарат</th>
+              <th style="padding:8px;text-align:center;">Кількість</th>
+              <th style="padding:8px;text-align:right;">Ціна</th>
+              <th style="padding:8px;text-align:right;">Сума</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr style="border-bottom:1px solid #f3f4f6;">
+              <td style="padding:8px;">
+                <strong>{{ item.medicine_name }}</strong>
+                {% if item.image_url %}
+                <br><img src="{{ url_for('static', filename='images/medicines/' + item.image_url) }}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;margin-top:4px;">
+                {% endif %}
+              </td>
+              <td style="padding:8px;text-align:center;">{{ item.quantity }}</td>
+              <td style="padding:8px;text-align:right;">{{ item.price|float(2) }} ₴</td>
+              <td style="padding:8px;text-align:right;font-weight:bold;">{{ (item.quantity * item.price)|float(2) }} ₴</td>
+            </tr>
+            {% endfor %}
+            <tr style="border-top:2px solid #16a34a;background:#f0fdf4;">
+              <td colspan="3" style="padding:12px;text-align:right;font-weight:bold;">Загальна сума:</td>
+              <td style="padding:12px;text-align:right;font-weight:bold;color:#16a34a;font-size:18px;">
+                {% set total = 0 %}
+                {% for item in items %}
+                  {% set total = total + (item.quantity * item.price) %}
+                {% endfor %}
+                {{ total|float(2) }} ₴
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

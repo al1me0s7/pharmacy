@@ -1,0 +1,38 @@
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Лік</th>
+                <th>Аптека</th>
+                <th>Категорія</th>
+                <th>Виробник</th>
+                <th>Ціна</th>
+                <th>Кількість</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in inventory %}
+            <tr>
+                <td><strong>{{ i.medicine_name }}</strong></td>
+                <td>{{ i.pharmacy_name }}</td>
+                <td>{{ i.category_name or '—' }}</td>
+                <td>{{ i.manufacturer_name or '—' }}</td>
+                <td>{{ i.price|float(2) }} ₴</td>
+                <td>
+                    <form method="POST" action="{{ url_for('admin_inventory.admin_inventory_update', pid=i.pharmacy_id, mid=i.medicine_id) }}" style="display:inline;">
+                        <input type="number" name="quantity" value="{{ i.quantity }}" min="0" style="width:60px;padding:4px;border:1px solid #e6e9ef;border-radius:3px;">
+                        <button type="submit" class="btn-edit" style="padding:2px 8px;font-size:12px;">Оновити</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('admin_inventory.admin_inventory_update', pid=i.pharmacy_id, mid=i.medicine_id) }}" style="display:inline;">
+                        <input type="hidden" name="quantity" value="0">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Видалити з інвентарю?');">Видалити</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" style="text-align:center;">Інвентар порожній</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>

@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Кошик</h2>
+  {% if not items %}
+    <p>Кошик порожній</p>
+  {% else %}
+    <!-- чи є рецептурні товари -->
+    {% set has_pharmacy = items|selectattr('pharmacy_id')|list|length > 0 %}
+    
+    <form id="cart-form">
+      <table class="cart-table">
+        <thead><tr><th>Товар</th>{% if has_pharmacy %}<th>Аптека</th>{% endif %}<th>Ціна</th><th>Кількість</th><th>Сума</th><th></th></tr></thead>
+        <tbody>
+          {% for it in items %}
+            <tr data-mid="{{ it.medicine.medicine_id }}" 
+                data-pharmacy="{{ it.pharmacy_id or '' }}" 
+                data-unit-price="{{ it.unit_price or 0 }}" 
+                data-key="{{ it.key }}">
+              <td><strong>{{ it.medicine.name }}</strong></td>
+              {% if has_pharmacy %}
+              <td style="font-size:13px;color:#666;">
+                {{ it.pharmacy_id and pharmacies|selectattr('pharmacy_id','eq',it.pharmacy_id|int)|first|default({'pharmacy_name':'n/a'})|attr('pharmacy_name') or '—' }}
+              </td>
+              {% endif %}
+              <td style="text-align:right;">
+                <span class="unit-price">{{ "%.2f"|format(it.unit_price or it.medicine.price) }}</span> грн
+              </td>
+              <td>
+                <div style="display:flex;gap:8px;align-items:center;justify-content:center;">
+                  <button type="button" class="btn qty-decr" style="padding:4px 8px;">−</button>
+                  <input class="qty-input" 
+                         data-key="{{ it.key }}" 
+                         value="{{ it.quantity }}" 
+                         size="3" 
+                         style="text-align:center;">
+                  <button type="button" class="btn primary qty-incr" style="padding:4px 8px;">+</button>
+                </div>
+              </td>
+              <td class="item-subtotal" style="text-align:right;font-weight:bold;">
+                {{ "%.2f"|format(it.subtotal) }} грн
+              </td>
+              <td>
+                <button type="button" class="btn btn-delete-item" style="background:#ef4444;color:white;padding:4px 12px;">✕</button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="form-actions">
+        <a class="btn primary" id="btn-checkout" href="/cart/checkout">
+          Оформити замовлення (всього: <span id="cart-total">{{ "%.2f"|format(total) }}</span> грн)
+        </a>
+      </div>
+    </form>
+
+    <script>
+      (function(){
+        const totalSpan = document.getElementById('cart-total');
+
+        // Оновлення кошика через JSON (як у models.py)
+        async function updateCart() {
+          const items = [];
+          document.querySelectorAll('tr[data-key]').forEach(row => {
+            const key = row.getAttribute('data-key');
+            const qtyInput = row.querySelector('.qty-input');
+            const qty = parseInt(qtyInput.value) || 0;
+            if (qty > 0) {
+              items.push({ key, qty });
+            }
+          });
+          try {
+            const res = await fetch('/cart/update', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ items })
+            });
+            if (!res.ok) throw new Error('Оновлення кошика не вдалося');
+            const data = await res.json();
+            // Оновити значок кошика в header
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+              badge.textContent = data.cart_count || 0;
+            }
+          } catch (e) {
+            console.error('Помилка оновлення кошика:', e);
+            alert('Не вдалося оновити кошик. Спробуйте пізніше.');
+          }
+        }
+
+        function recalc() {
+          let total = 0;
+          document.querySelectorAll('tr[data-key]').forEach(row => {
+            const qty = parseInt(row.querySelector('.qty-input').value) || 0;
+            const unit = parseFloat(row.getAttribute('data-unit-price')) || 0;
+            const subtotal = (unit * qty).toFixed(2);
+            row.querySelector('.item-subtotal').textContent = subtotal + ' грн';
+            total += parseFloat(subtotal);
+          });
+          if (totalSpan) totalSpan.textContent = total.toFixed(2);
+        }
+
+        // Кнопки + / −
+        document.querySelectorAll('.qty-incr').forEach(btn => 
+          btn.addEventListener('click', () => {
+            const input = btn.closest('tr').querySelector('.qty-input');
+            input.value = Math.max(1, (parseInt(input.value) || 1) + 1);
+            recalc();
+            updateCart();
+          })
+        );
+        document.querySelectorAll('.qty-decr').forEach(btn => 
+          btn.addEventListener('click', () => {
+            const input = btn.closest('tr').querySelector('.qty-input');
+            input.value = Math.max(1, (parseInt(input.value) || 1) - 1);
+            recalc();
+            updateCart();
+          })
+        );
+
+        // Ввід у поле (лише цифри)
+        document.querySelectorAll('.qty-input').forEach(input => 
+          input.addEventListener('input', () => {
+            input.value = input.value.replace(/[^0-9]/g, '');
+            if (input.value === '') input.value = '1';
+            recalc();
+            updateCart();
+          })
+        );
+
+        // Видалення
+        document.querySelectorAll('.btn-delete-item').forEach(btn => 
+          btn.addEventListener('click', async () => {
+            const row = btn.closest('tr[data-key]');
+            const key = row.getAttribute('data-key');
+            try {
+              const res = await fetch(`/cart/remove/${encodeURIComponent(key)}`, { method: 'POST' });
+              if (res.ok) {
+                row.style.animation = 'fadeOut 0.3s';
+                setTimeout(() => {
+                  row.remove();
+                  recalc();
+                  // Оновити значок кошика
+                  const badge = document.getElementById('cart-badge');
+                  if (badge) {
+                    const n = parseInt(badge.textContent || 0) - 1;
+                    badge.textContent = n > 0 ? n : '';
+                  }
+                }, 300);
+              }
+            } catch (e) {
+              console.error('Помилка видалення:', e);
+            }
+          })
+        );
+
+        recalc();
+      })();
+    </script>
+    <style>
+      @keyframes fadeOut { 
+        0% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+    </style>
+  {% endif %}
+{% endblock %}

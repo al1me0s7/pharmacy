@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Мої замовлення</h2>
+
+{% if not orders %}
+  <p style="color: #999; padding: 2rem; background: #f9fafb; border-radius: 8px;">У вас ще немає замовлень</p>
+{% else %}
+  <div style="display: grid; gap: 1.5rem;">
+    {% for order in orders %}
+    <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.5rem;">
+      <div style="display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 2rem; margin-bottom: 1rem;">
+        <div>
+          <h3 style="margin: 0 0 8px 0;">Замовлення #{{ order.order_id }}</h3>
+
+          <p style="margin: 0; color: #666; font-size: 14px;">
+            {{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') if order.order_date else '' }}
+          </p>
+
+          <p style="margin: 8px 0 0 0; color: #666;">Адреса: <strong>{{ order.delivery_address }}</strong></p>
+          {% if order.city_name %}
+            <p style="margin: 0; color: #666;">Місто: <strong>{{ order.city_name }}</strong></p>
+          {% endif %}
+        </div>
+
+        <div style="text-align: right;">
+          <div style="font-size: 24px; font-weight: bold; color: #2563eb;">{{ order.total_sum }} грн</div>
+          <div style="margin-top: 8px;">
+            {% set label = translate_order_status(order.delivery_status) %}
+            {% if order.delivery_status == 'pending' %}
+              <span style="background: #fef08a; color: #92400e; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;">{{ label }}</span>
+            {% elif order.delivery_status == 'delivered' %}
+              <span style="background: #dcfce7; color: #166534; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;">{{ label }}</span>
+            {% else %}
+              <span style="background: #e5e7eb; color: #374151; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;">{{ label }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 1rem;">
+        <a href="/download_order/{{ order.order_id }}" class="btn" style="flex: 1; text-align: center;">Чек</a>
+
+        {% if order.can_cancel %}
+        <form method="post" action="/orders/delete/{{ order.order_id }}" style="flex: 1;">
+          <button type="submit" class="btn" style="width: 100%; background: #ef4444; color: white;" onclick="return confirm('Ви впевнені?')">Скасувати</button>
+        </form>
+        {% endif %}
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<p style="margin-top: 2rem;"><a href="/" class="btn">←</a></p>
+{% endblock %}

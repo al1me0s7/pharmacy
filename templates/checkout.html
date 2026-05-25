@@ -1,0 +1,402 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto; padding: 2rem;">
+  <h2>Оформлення замовлення</h2>
+
+  <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem;">
+    
+    <!-- ТОВАРИ -->
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <h3 style="margin-top: 0;">Товари</h3>
+      <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+          <th style="text-align: left; padding: 8px 0;">Товар</th>
+          <th style="text-align: right; padding: 8px 0;">Кількість</th>
+          <th style="text-align: right; padding: 8px 0;">Сума</th>
+        </tr>
+        {% for item in items %}
+        <tr data-key="{{ item.key }}" data-medicine-id="{{ item.medicine.medicine_id }}" data-quantity="{{ item.quantity }}" style="border-bottom: 1px solid #e5e7eb;">
+          <td style="padding: 8px 0;"><strong>{{ item.medicine.name }}</strong></td>
+          <td style="text-align: right; padding: 8px 0;">{{ item.quantity }} ×</td>
+          <td style="text-align: right; padding: 8px 0;" class="item-price" data-base-price="{{ item.price }}">{{ "%.2f"|format(item.subtotal) }} грн</td>
+        </tr>
+        {% endfor %}
+        <tr style="border-top: 2px solid #1fbd56; font-weight: bold;">
+          <td style="padding: 12px 0;"></td>
+          <td style="text-align: right; padding: 12px 0;"></td>
+          <td style="text-align: right; padding: 12px 0;" class="total-price">{{ "%.2f"|format(total) }} грн</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ФОРМА -->
+    <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <h3 style="margin-top: 0;">Деталі замовлення</h3>
+      
+      <form method="post" id="checkout-form">
+
+        <!-- ДАНІ ОТРИМУВАЧА -->
+        <div class="section-title">Дані отримувача</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="full_name">Прізвище та ім'я:</label>
+            <input type="text" id="full_name" name="recipient_name" required value="{{ user.full_name or '' }}">
+          </div>
+          <div class="form-group">
+            <label for="phone">Телефон:</label>
+            <input type="tel" id="phone" name="recipient_phone" required value="{{ user.phone_number or '' }}">
+          </div>
+          <div class="form-group">
+            <label for="city_input">Місто:</label>
+            <input type="text" id="city_input" name="city" required value="{{ user.city_name or user.city or '' }}">
+          </div>
+        </div>
+
+        <!-- КОМЕНТАР ДО ЗАМОВЛЕННЯ -->
+        <div class="form-group">
+          <label for="order_comment">Коментар до замовлення (необов'язково):</label>
+          <textarea id="order_comment" name="comment" rows="2" placeholder="Додайте коментар або побажання..." style="width:100%;resize:vertical;"></textarea>
+        </div>
+
+        {% if order_type == 'site' %}
+        <!-- БЕЗ РЕЦЕПТУРНИХ - ЗВИЧАЙНА ДОСТАВКА -->
+        <!-- СПОСІБ ДОСТАВКИ -->
+        <div class="section-title">Спосіб доставки</div>
+        <div class="form-group">
+          <label for="delivery-method">Оберіть спосіб доставки:</label>
+          <select id="delivery-method" name="delivery_method" required>
+            <option value="">-- Оберіть --</option>
+            <option value="home">Доставка додому</option>
+            <option value="self_pickup">Самовивіз з аптеки</option>
+            <option value="nova_poshta">Нова Пошта</option>
+            <option value="ukrposhta">Укрпошта</option>
+          </select>
+        </div>
+
+        <!-- АДРЕСА ДОМУ -->
+        <div id="home-address-section" class="conditional-group form-group" style="display:none;">
+          <label for="delivery_address">Адреса доставки:</label>
+          <input type="text" id="delivery_address" name="delivery_address" placeholder="Вул. Приклад, 1, кв. 1" value="{{ user.address or '' }}">
+        </div>
+
+        <!-- НОВА ПОШТА / УКРПОШТА -->
+        <div id="post-section" class="conditional-group form-group" style="display:none;">
+          <label for="post_branch">Номер відділення / номер поштомату:</label>
+          <input type="text" id="post_branch" name="post_branch" placeholder="Наприклад: 45 або П123456">
+        </div>
+
+        <!-- САМОВИВІЗ З АПТЕКИ - ВИБІР МІСТА І АПТЕКИ -->
+        <div id="pharmacy-section" class="conditional-group" style="display:none;">
+          <div class="section-title">Оберіть місто та аптеку</div>
+          <div class="form-group">
+            <label for="city_select_site">Місто (доступних міст: {{ cities|length }}):</label>
+            <select id="city_select_site" name="city">
+              <option value="">-- Оберіть місто --</option>
+              {% for c in cities %}
+                <option value="{{ c.city_name }}">{{ c.city_name }}</option>
+              {% else %}
+                <option disabled>Немає доступних міст</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="pharmacy_select_site">Аптека:</label>
+            <select id="pharmacy_select_site" name="pharmacy">
+              <option value="">-- Спочатку оберіть місто --</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- СПОСІБ ОПЛАТИ -->
+        <div class="section-title">Спосіб оплати</div>
+        <div class="form-group">
+          <label for="payment_method">Оберіть спосіб оплати:</label>
+          <select id="payment_method" name="payment_method" required>
+            <option value="cash_on_delivery">Накладний платіж (оплата при отриманні)</option>
+            <option value="card_online">Оплата картою на сайті</option>
+          </select>
+        </div>
+
+        {% else %}
+        <!-- З РЕЦЕПТУРНИМИ - ТІЛЬКИ САМОВИВІЗ ІЗ АПТЕКИ -->
+        <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+          <strong style="color: #991b1b;">РЕЦЕПТУРНІ ПРЕПАРАТИ</strong>
+          <p style="margin: 8px 0 0 0; font-size: 14px;">У вашому замовленні є рецептурні препарати. Замовлення оформлюється як <strong>бронювання</strong> з самовивізом з аптеки.<br><strong>Спосіб оплати: тільки накладний (при отриманні)</strong></p>
+        </div>
+
+        <!-- ВИБІР МІСТА -->
+        <div class="section-title">Оберіть місто</div>
+        <div class="form-group">
+          <label for="city_select">Місто:</label>
+          <select id="city_select" name="city" required>
+            <option value="">-- Оберіть місто --</option>
+            {% for c in cities %}
+              <option value="{{ c.city_name }}">{{ c.city_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- ВИБІР АПТЕКИ -->
+        <div class="section-title">Оберіть аптеку для самовивізу</div>
+        <div class="form-group">
+          <label for="pharmacy_select">Аптека:</label>
+          <select id="pharmacy_select" name="pharmacy" required>
+            <option value="">-- Спочатку оберіть місто --</option>
+          </select>
+        </div>
+
+        <input type="hidden" name="delivery_method" value="self_pickup">
+        <input type="hidden" name="payment_method" value="cash_on_delivery">
+        
+        <script>
+          document.getElementById('city_select').addEventListener('change', function() {
+            const selectedCity = this.value;
+            const pharmacySelect = document.getElementById('pharmacy_select');
+            const pharmacies = {{ pharmacies|tojson }};
+            
+            pharmacySelect.innerHTML = '<option value="">-- Оберіть аптеку --</option>';
+            
+            if (selectedCity) {
+              const filtered = pharmacies.filter(p => p.city_name === selectedCity);
+              filtered.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.pharmacy_id;
+                option.textContent = p.pharmacy_name + ' (' + p.address + ')';
+                pharmacySelect.appendChild(option);
+              });
+            }
+          });
+        </script>
+        {% endif %}
+
+        <!-- ПРИХОВАНІ ПОЛЯ ДЛЯ БЕКЕНДУ -->
+        <input type="hidden" name="delivery_method" id="delivery_method" value="home">
+        <input type="hidden" name="post_service" id="post_service" value="">
+        <input type="hidden" name="city" id="city_input" value="">
+
+        <!-- КНОПКИ -->
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+          <a href="/cart" class="btn" style="padding: 12px 24px;">Повернутись до кошика</a>
+          <button type="submit" class="btn primary" style="padding: 12px 24px; flex: 1; font-weight: 600;">Підтвердити замовлення</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    console.log('Script loaded and running');
+    const orderType = '{{ order_type }}';
+    console.log('Order type:', orderType);
+    const form = document.getElementById('checkout-form');
+    console.log('Form found:', !!form);
+    
+    // Елементи форми доставки
+    const dmSelect = document.getElementById('delivery-method');
+    const homeSection = document.getElementById('home-address-section');
+    const postSection = document.getElementById('post-section');
+    const pharmacySection = document.getElementById('pharmacy-section');
+    
+    // Приховані поля
+    const dmInput = document.getElementById('delivery_method');
+    const postServiceInput = document.getElementById('post_service');
+    const postBranch = document.getElementById('post_branch');
+
+    // Логіка відображення полів доставки (тільки для звичайних замовлень)
+    function updateDeliveryFields(){
+      if (!dmSelect) return;
+      
+      const val = dmSelect.value;
+      if(homeSection) homeSection.style.display = 'none';
+      if(postSection) postSection.style.display = 'none';
+      if(pharmacySection) pharmacySection.style.display = 'none';
+
+      if(val === 'home'){
+        if(homeSection) homeSection.style.display = 'block';
+        if(dmInput) dmInput.value = 'home';
+        if(postServiceInput) postServiceInput.value = '';
+      } else if(val === 'self_pickup'){
+        if(pharmacySection) pharmacySection.style.display = 'block';
+        if(dmInput) dmInput.value = 'self_pickup';
+        if(postServiceInput) postServiceInput.value = '';
+        setupPharmacyFilter(); // Ініціалізуємо фільтр аптек
+      } else if(val === 'nova_poshta'){
+        if(postSection) postSection.style.display = 'block';
+        if(dmInput) dmInput.value = 'nova_poshta';
+        if(postServiceInput) postServiceInput.value = 'nova_poshta';
+      } else if(val === 'ukrposhta'){
+        if(postSection) postSection.style.display = 'block';
+        if(dmInput) dmInput.value = 'ukrposhta';
+        if(postServiceInput) postServiceInput.value = 'ukrposhta';
+      }
+    }
+
+    // Логіка вибору аптеки та оновлення цін
+    function setupPharmacyFilter(){
+
+      // Варіант 1: Звичайне замовлення (site)
+      let citySelect = document.getElementById('city_select_site');
+      let pharmacySelect = document.getElementById('pharmacy_select_site');
+      
+      // Варіант 2: Бронювання (booking) - якщо перших немає, шукаємо ці
+      if (!citySelect) citySelect = document.getElementById('city_select');
+      if (!pharmacySelect) pharmacySelect = document.getElementById('pharmacy_select');
+
+      const pharmacies = {{ pharmacies|tojson }};
+      const pharmacyPrices = {{ pharmacy_prices|tojson }};
+      
+      if(!citySelect || !pharmacySelect) {
+        console.log('Поля вибору міста/аптеки не знайдені (можливо інший тип доставки)');
+        return;
+      }
+      
+
+      // Обробник зміни міста
+      citySelect.onchange = function() {
+        const selectedCity = this.value;
+        pharmacySelect.innerHTML = '<option value="">-- Оберіть аптеку --</option>';
+        
+        if (selectedCity) {
+          const filtered = pharmacies.filter(p => p.city_name === selectedCity);
+          filtered.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.pharmacy_id;
+            option.textContent = p.pharmacy_name + ' (' + p.address + ')';
+            pharmacySelect.appendChild(option);
+          });
+        }
+      };
+
+      // Обробник зміни аптеки (ОНОВЛЕННЯ ЦІН ТА ПЕРЕВІРКА НАЯВНОСТІ)
+      pharmacySelect.onchange = function() {
+        const selectedPharmacyId = parseInt(this.value);
+        if (!selectedPharmacyId) return;
+        
+        const itemRows = document.querySelectorAll('table tr[data-medicine-id]');
+        let totalPrice = 0;
+        let allItemsAvailable = true; // Прапорець, чи все є в наявності
+        
+        itemRows.forEach(row => {
+          const medicineId = row.dataset.medicineId;
+          const quantity = parseInt(row.dataset.quantity);
+          const priceCell = row.querySelector('.item-price');
+          
+          let price = null;
+          
+          // Перевіряємо, чи є ціна для цієї аптеки
+          if (pharmacyPrices[medicineId] && pharmacyPrices[medicineId][selectedPharmacyId]) {
+            price = parseFloat(pharmacyPrices[medicineId][selectedPharmacyId]);
+          }
+          
+          // Якщо ціна знайдена і вона коректна
+          if (price !== null && !isNaN(price)) {
+            const subtotal = price * quantity;
+            priceCell.textContent = subtotal.toFixed(2) + ' грн';
+            priceCell.style.color = '#000'; // Чорний колір (все ок)
+            priceCell.style.fontWeight = 'normal';
+            totalPrice += subtotal;
+          } else {
+            // ЛІКІВ НЕМАЄ В ЦІЙ АПТЕЦІ
+            priceCell.textContent = 'Немає в наявності';
+            priceCell.style.color = '#dc2626'; // Червоний колір
+            priceCell.style.fontWeight = 'bold';
+            allItemsAvailable = false; // Блокуємо замовлення
+          }
+        });
+        
+        const totalCell = document.querySelector('table .total-price');
+        if (totalCell) {
+          totalCell.textContent = totalPrice.toFixed(2) + ' грн';
+        }
+
+        // БЛОКУВАННЯ КНОПКИ ЗАМОВЛЕННЯ
+        // Знайдемо кнопку відправки форми
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if(submitBtn) {
+            if(!allItemsAvailable) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Товари відсутні в обраній аптеці';
+                submitBtn.style.opacity = '0.5';
+                submitBtn.style.cursor = 'not-allowed';
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Підтвердити замовлення';
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+            }
+        }
+      };
+    }
+
+    // Ініціалізація при завантаженні
+    if (orderType === 'site') {
+        // Якщо це сайт, чекаємо вибору доставки
+        if(dmSelect) {
+            dmSelect.addEventListener('change', updateDeliveryFields);
+            // Якщо вже щось вибрано (наприклад після перезавантаження сторінки)
+            updateDeliveryFields();
+        }
+    } else {
+        // Якщо це бронювання (рецепт), фільтр аптек має працювати відразу
+        setupPharmacyFilter();
+    }
+
+    // Валідація форми
+    if(form) {
+        console.log('Form event listener attached');
+        form.addEventListener('submit', function(ev){
+          console.log('Form submitted! Order type:', orderType);
+          // Валідація для 'site' замовлень
+          if(orderType === 'site'){
+            const dm = dmSelect ? dmSelect.value : null;
+            console.log('Delivery method:', dm);
+            
+            // Перевіра що спосіб доставки вибраний
+            if(!dm || dm === ''){
+              alert('Будь ласка, оберіть спосіб доставки'); 
+              ev.preventDefault(); 
+              return;
+            }
+            
+            // Перевіра поля адреси для доставки додому
+            if(dm === 'home'){
+              const addr = document.getElementById('delivery_address');
+              console.log('Home address:', addr ? addr.value : 'not found');
+              if(!addr || !addr.value.trim()){
+                alert('Будь ласка, вкажіть адресу доставки'); 
+                ev.preventDefault(); 
+                return;
+              }
+            }
+            
+            // Перевіра номеру відділення для поштових сервісів
+            if(dm === 'nova_poshta' || dm === 'ukrposhta'){
+              console.log('Post branch:', postBranch ? postBranch.value : 'not found');
+              if(!postBranch || !postBranch.value.trim()){
+                alert('Будь ласка, вкажіть номер відділення'); 
+                ev.preventDefault(); 
+                return;
+              }
+            }
+            
+            // Перевіра вибору аптеки для самовивізу
+            if(dm === 'self_pickup'){
+              const pharmSelect = document.getElementById('pharmacy_select_site');
+              console.log('Pharmacy:', pharmSelect ? pharmSelect.value : 'not found');
+              if(!pharmSelect || !pharmSelect.value){
+                alert('Будь ласка, оберіть аптеку'); 
+                ev.preventDefault(); 
+                return;
+              }
+            }
+          }
+          console.log('Form validation passed, submitting');
+        });
+    } else {
+      console.error('Form not found with id="checkout-form"');
+    }
+
+  })();
+</script>
+{% endblock %}

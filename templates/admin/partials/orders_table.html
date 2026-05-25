@@ -1,0 +1,34 @@
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead style="background: #f3f4f6;">
+        <tr>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">ID</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">КЛІЄНТ</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">EMAIL</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">ДАТА</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">МЕТОД</th>
+          <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e5e7eb;">СУМА</th>
+          <th style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">СТАТУС</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+          <td style="padding: 12px;"><strong>#{{ order.order_id }}</strong></td>
+          <td style="padding: 12px;">{{ order.full_name }}</td>
+          <td style="padding: 12px;">{{ order.email }}</td>
+          <td style="padding: 12px; font-size: 13px;">{{ order.order_date.strftime('%Y-%m-%d %H:%M') if order.order_date else '' }}</td>
+          <td style="padding: 12px;">{{ translate_delivery_method(order.delivery_method) }}</td>
+          <td style="padding: 12px; text-align: right;"><strong>{{ order.total_sum }} грн</strong></td>
+          <td style="padding: 12px; text-align: center;">
+            {% if order.delivery_status == 'pending' %}
+              <span style="background: #fef08a; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Очікує</span>
+            {% elif order.delivery_status == 'delivered' %}
+              <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Доставлено</span>
+            {% else %}
+              <span style="background: #e5e7eb; color: #374151; padding: 4px 8px; border-radius: 4px; font-size: 12px;">{{ translate_order_status(order.delivery_status) }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>

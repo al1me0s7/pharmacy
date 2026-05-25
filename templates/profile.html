@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; padding: 2rem;">
+  <h2>Мій Профіль</h2>
+
+  <!-- РЕДАГУВАННЯ ПРОФІЛЮ -->
+  <div style="background: white; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0;">Редагування даних</h3>
+    <form method="post" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-weight: 500;">ПІБ:</label>
+        <input type="text" name="full_name" value="{{ user.full_name }}" required style="width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px;">
+      </div>
+      
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Телефон:</label>
+        <input type="tel" name="phone" value="{{ user.phone_number or '' }}" style="width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px;">
+      </div>
+      
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Email (не можна змінити):</label>
+        <input type="email" value="{{ user.email }}" disabled style="width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; color: #999;">
+      </div>
+      
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Місто:</label>
+        <select name="city" class="ts-select" style="width: 100%;">
+          <option value="">-- Оберіть місто --</option>
+          {% for city in cities %}
+            <option value="{{ city.city_name }}" {% if user.city == city.city_name %}selected{% endif %}>{{ city.city_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div>
+        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Поштовий індекс:</label>
+        <input type="text" name="postal_code" value="{{ user.postal_code or '' }}" placeholder="Наприклад: 01001" style="width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px;">
+      </div>
+      
+      <div style="grid-column: 1 / -1;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Адреса:</label>
+        <input type="text" name="address" value="{{ user.address or '' }}" placeholder="Вул. Приклад, 1, кв. 1" style="width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px;">
+      </div>
+      
+      <div style="grid-column: 1 / -1;">
+        <button type="submit" class="btn primary" style="width: 100%; padding: 12px; font-size: 16px;">Зберегти зміни</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ВИДАЛЕННЯ АКАУНТУ -->
+  <div style="background: #fee2e2; border: 1px solid #fca5a5; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+    <p style="color: #7f1d1d; margin: 0 0 12px 0;">Видалення акаунту не можна повернути.</p>
+    <form method="post" action="/profile/delete" onsubmit="return confirm('Ви впевнені? Цю дію неможливо скасувати!');">
+      <button type="submit" class="btn" style="background: #ef4444; color: white;">Видалити мій акаунт</button>
+    </form>
+  </div>
+
+  <!-- ЗАМОВЛЕННЯ -->
+  {% if orders %}
+  <div style="background: white; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0;">Мої замовлення ({{ orders|length }})</h3>
+    <div style="display: grid; gap: 1rem;">
+      {% for order in orders %}
+      <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center;">
+        <div>
+          <h4 style="margin: 0 0 4px 0;">Замовлення #{{ order.order_id }}</h4>
+          <p style="margin: 0; font-size: 13px; color: #666;">{{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') if order.order_date else '' }} • {{ order.delivery_address[:40] }}...</p>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-weight: bold; color: #2563eb; margin-bottom: 8px;">{{ order.total_sum }} грн</div>
+          <div style="margin-bottom:8px;">
+            {% set label = order.status_display %}
+            {% if order.delivery_status == 'pending' %}
+              <span style="background: #fef08a; color: #92400e; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;">{{ label }}</span>
+            {% elif order.delivery_status == 'delivered' %}
+              <span style="background: #dcfce7; color: #166534; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;">{{ label }}</span>
+            {% else %}
+              <span style="background: #e5e7eb; color: #374151; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;">{{ label }}</span>
+            {% endif %}
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <a href="/download_order/{{ order.order_id }}" class="btn" style="font-size: 12px; padding: 6px 12px;">Чек</a>
+            {% if order.can_cancel %}
+            <form method="post" action="/orders/delete/{{ order.order_id }}" style="display: inline;">
+              <button type="submit" class="btn" style="font-size: 12px; padding: 6px 12px; background: #ef4444; color: white;" onclick="return confirm('Скасувати замовлення?')">Скасувати</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- БРОНЮВАННЯ -->
+  {% if bookings %}
+  <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0;">Мої бронювання ({{ bookings|length }})</h3>
+    <div style="display: grid; gap: 1rem;">
+      {% for booking in bookings %}
+      <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center;">
+        <div>
+          <h4 style="margin: 0 0 4px 0;">{{ booking.medicine_name }} (#{{ booking.booking_id }})</h4>
+          <p style="margin: 0; font-size: 13px; color: #666;">{{ booking.booking_date.strftime('%Y-%m-%d %H:%M:%S') if booking.booking_date else '' }} • {{ booking.pharmacy_name }}</p>
+        </div>
+        <div style="text-align: right;">
+          <div style="margin-bottom: 8px;">
+            {% if booking.status_display == 'Отримано' %}
+              <span style="background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;"> {{ booking.status_display }}</span>
+            {% elif booking.status_display == 'Активне' %}
+              <span style="background: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;"> {{ booking.status_display }}</span>
+            {% elif booking.status_display == 'Закінчилось' %}
+              <span style="background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;"> {{ booking.status_display }}</span>
+            {% endif %}
+          </div>
+          <div style="display: flex; gap: 6px;">
+            {% if booking.status_display != 'Закінчилось' %}
+            <a href="/download_booking/{{ booking.booking_id }}" class="btn" style="font-size: 12px; padding: 6px 12px;">Чек</a>
+            {% endif %}
+            {% if booking.can_cancel %}
+            <form method="post" action="/bookings/delete/{{ booking.booking_id }}" style="display: inline;">
+              <button type="submit" class="btn" style="font-size: 12px; padding: 6px 12px; background: #ef4444; color: white;" onclick="return confirm('Скасувати бронювання?')">✕</button>
+            </form>
+            {% endif %}
+            {% if booking.status_display == 'Активне' %}
+            <form method="post" action="/bookings/confirm/{{ booking.booking_id }}" style="display: inline;">
+              <button type="submit" class="btn primary" style="font-size: 12px; padding: 6px 12px;">Отримано</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+<script>
+setInterval(function() {
+  location.reload();
+}, 10 * 60 * 1000); // 10 хвилин
+</script>
+{% endblock %}

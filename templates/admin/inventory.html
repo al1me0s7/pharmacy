@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <h1 style="margin:0;">Управління цінами за аптеками</h1>
+    <a href="{{ url_for('admin_dashboard.admin_dashboard') }}" class="btn" style="background:#16a34a;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;border:none;cursor:pointer;">← На панель</a>
+</div>
+<div class="admin-container">
+    
+    <div class="form-card">
+        <h3>Додати/оновити ціну</h3>
+        <form method="POST" action="{{ url_for('admin_inventory.admin_inventory_create') }}">
+            <div class="form-row">
+                <select name="medicine_id" required>
+                    <option value="">Виберіть лік</option>
+                    {% for m in medicines %}
+                    <option value="{{ m.medicine_id }}">{{ m.name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="pharmacy_id" required>
+                    <option value="">Виберіть аптеку</option>
+                    {% for p in pharmacies %}
+                    <option value="{{ p.pharmacy_id }}">{{ p.pharmacy_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row">
+                <input type="number" name="quantity" min="0" placeholder="Кількість" required>
+                <input type="number" name="selling_price" step="0.01" min="0" placeholder="Ціна продажу" required>
+            </div>
+            <button type="submit" class="btn-primary">Додати/оновити</button>
+        </form>
+    </div>
+
+    <h3 style="margin-top: 30px;">Таблиця цін</h3>
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Лік</th>
+                <th>Аптека</th>
+                <th>Кількість</th>
+                <th>Ціна продажу</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in inventory %}
+            <tr>
+                <td>{{ i.medicine_name }}</td>
+                <td>{{ i.pharmacy_name }}</td>
+                <td>{{ i.quantity }}</td>
+                <td>{{ i.price|float(2) }} ₴</td>
+                <td>
+                    <form method="POST" action="{{ url_for('admin_inventory.admin_inventory_delete', mid=i.medicine_id, pid=i.pharmacy_id) }}" style="display:inline;">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Видалити?');">Видалити</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" style="text-align:center;">Даних немає</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.admin-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.form-card { background: #f5f5f5; padding: 20px; border-radius: 8px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+.form-row input, .form-row select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+.form-row input:focus, .form-row select:focus { outline: none; border-color: #16a34a; }
+.btn-primary { background: #16a34a; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+.btn-primary:hover { background: #159940; }
+.btn-delete { background: #ef4444; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 4px; }
+.admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.admin-table thead { background: #16a34a; color: white; }
+.admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+.admin-table tbody tr:hover { background: #f9f9f9; }
+</style>
+{% endblock %}

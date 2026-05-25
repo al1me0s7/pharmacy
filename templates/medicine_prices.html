@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="medicine-detail" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <h1>{{ med.name }}</h1>
+    <p>{{ med.description }}</p>
+    {% if med.prescription_required %}
+    <div style="background: #fef2f2; border: 2px solid #dc2626; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <strong style="color: #dc2626;">РЕЦЕПТУРНИЙ ПРЕПАРАТ</strong>
+        <p style="margin: 8px 0 0 0; font-size: 14px;">Цей препарат можна придбати та застрахувати в кошику. При оформленні замовлення ви зможете вибрати самовивіз з аптеки або бронювання.</p>
+    </div>
+    {% endif %}
+    
+    <h2>Ціни в аптеках</h2>
+    
+    <!-- Фільтр по місту -->
+    <div style="margin-bottom: 20px;">
+        <label for="city_filter" style="font-weight: bold;">Оберіть місто:</label>
+        <select id="city_filter" style="margin-left: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="">Не обрано</option>
+            {% for city in cities %}
+            <option value="{{ city.city_id }}" {% if selected_city_id and city.city_id == selected_city_id|int %}selected{% endif %}>{{ city.city_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="prices-grid" id="prices-grid" style="display: grid; gap: 15px;">
+        {% for price in prices %}
+        <div class="price-card" style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: white; display:flex; justify-content:space-between; align-items:center;" data-city="{{ price.city_id }}">
+            <div>
+                <h3>{{ price.pharmacy_name }}</h3>
+                <p><strong>Ціна:</strong> {{ price.price }} грн</p>
+                <p><strong>Адреса:</strong> {{ price.city_name }}, {{ price.address }}</p>
+                <p><strong>Години роботи:</strong> {{ price.working_hours }}</p>
+                <p><strong>Телефон:</strong> {{ price.contact_phone }}</p>
+            </div>
+            <div style="margin-left:20px;">
+                <form method="post" action="/cart/add" style="display: flex; flex-direction: column; gap: 10px;">
+                    <input type="hidden" name="medicine_id" value="{{ med.medicine_id }}">
+                    <input type="hidden" name="pharmacy" value="{{ price.pharmacy_id if price.pharmacy_id is defined else price.get('pharmacy_id') }}">
+                    <div style="display: flex; gap: 5px; align-items: center;">
+                        <label style="font-size: 14px;">Кількість:</label>
+                        <input type="number" name="quantity" value="1" min="1" style="width: 60px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <button type="submit" class="btn primary" style="width: 100%;">Додати в кошик</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <a href="/medicine/{{ med.medicine_id }}" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background: #16a34a; color: white; text-decoration: none; border-radius: 5px;">Назад до деталей</a>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cityFilter = document.getElementById('city_filter');
+    const priceCards = document.querySelectorAll('.price-card');
+    
+    function filterPrices() {
+        const selectedCity = cityFilter.value;
+        priceCards.forEach(card => {
+            const cardCity = card.getAttribute('data-city');
+            if (!selectedCity || cardCity == selectedCity) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    cityFilter.addEventListener('change', filterPrices);
+});
+</script>
+{% endblock %}

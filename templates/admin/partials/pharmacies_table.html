@@ -1,0 +1,29 @@
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Назва аптеки</th>
+                <th>Адреса</th>
+                <th>Телефон</th>
+                <th>Години роботи</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in pharmacies %}
+            <tr>
+                <td><strong>{{ p.pharmacy_name }}</strong></td>
+                <td>{{ p.address }}</td>
+                <td>{{ p.phone_number or '—' }}</td>
+                <td>{{ p.working_hours or '—' }}</td>
+                <td>
+                    <a href="{{ url_for('admin_pharmacies.admin_pharmacies_edit', pid=p.pharmacy_id) }}" class="btn-edit" title="Редагувати">Редагувати</a>
+                    <form method="POST" action="{{ url_for('admin_pharmacies.admin_pharmacies_delete', pid=p.pharmacy_id) }}" style="display:inline;">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Видалити цю аптеку?');">Видалити</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" style="text-align:center;">Аптеки не знайдені</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>

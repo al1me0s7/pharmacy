@@ -1,0 +1,23 @@
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Назва виробника</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in manufacturers %}
+            <tr>
+                <td><strong>{{ m.manufacturer_name }}</strong></td>
+                <td>
+                    <a href="{{ url_for('admin_manufacturers.admin_manufacturers_edit', mid=m.manufacturer_id) }}" class="btn-edit" title="Редагувати">Редагувати</a>
+                    <form method="POST" action="{{ url_for('admin_manufacturers.admin_manufacturers_delete', mid=m.manufacturer_id) }}" style="display:inline;">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Видалити цього виробника?');">Видалити</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="2" style="text-align:center;">Виробники не знайдені</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>

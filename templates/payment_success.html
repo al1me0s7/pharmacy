@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 2rem; text-align: center;">
+  <h2>Оплата успішна!</h2>
+  <p>Ваше замовлення підтверджено. Квитанція про оплату завантажується...</p>
+  
+  <div style="margin: 2rem 0;">
+    <a id="download-link" href="/download/payment_receipt" class="btn primary" style="padding: 12px 24px; font-size: 16px; display: inline-block;">
+      Завантажити квитанцію
+    </a>
+  </div>
+  
+  <p style="color: #666; font-size: 14px;">Якщо файл не завантажувався автоматично, натисніть кнопку вище.</p>
+  
+  <a href="/my_orders" class="btn" style="padding: 10px 20px; margin-top: 1rem;">Мої замовлення</a>
+  <a href="/" class="btn primary" style="padding: 10px 20px; margin-top: 1rem; margin-left: 1rem;">На головну</a>
+</div>
+
+<script>
+  //завантажити файл з затримкою для надійності
+  window.addEventListener('load', function() {
+    // Затримка для того щоб система встигла обробити дані
+    setTimeout(function() {
+      var link = document.getElementById('download-link');
+      if (link) {
+        link.click();
+      }
+    }, 500);
+  });
+</script>
+{% endblock %}

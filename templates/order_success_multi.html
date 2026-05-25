@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="success-card">
+    <h2>Дякуємо! Замовлення створено</h2>
+    <p>Створені замовлення:</p>
+    <ul>
+      {% for order in orders %}
+        <li>
+          Замовлення #{{ order.order_id }} — <a href="/order/success/{{ order.order_id }}">Переглянути</a> • <a href="/download_order/{{ order.order_id }}">Завантажити чек</a>
+          {% if order.can_cancel %}
+          <form method="post" action="/orders/delete/{{ order.order_id }}" style="display: inline; margin-left: 10px;">
+            <button type="submit" class="btn" style="font-size: 12px; padding: 4px 8px; background: #ef4444; color: white;" onclick="return confirm('Скасувати замовлення?')">Скасувати</button>
+          </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    <div style="margin-top:18px; display:flex; gap:12px; justify-content:center;">
+      <a class="btn" href="/" style="font-size:16px;padding:12px 20px">Повернутись в каталог</a>
+      <a class="btn" href="/profile">Мій профіль</a>
+    </div>
+  </div>
+{% endblock %}

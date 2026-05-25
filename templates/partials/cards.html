@@ -1,0 +1,47 @@
+{% for m in meds %}
+  <article class="card" data-href="/medicine/{{ m.get('medicine_id') }}" role="button">
+    <div class="card-media">
+      <img alt="{{ m.get('name') or 'Ліки' }}" src="{{ m.get('image') or '/static/images/placeholder.svg' }}" style="background: white; width: 100%; height: auto; object-fit: contain;">
+      {% if m.get('prescription_required') %}<div style="position: absolute; top: 8px; right: 8px; background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Рецепт</div>{% endif %}
+    </div>
+    <div class="card-body">
+      <h3 class="card-title">{{ m.get('name') }}</h3>
+      <p class="card-price">{{ m.get('price') }} грн</p>
+      {% if m.get('avg_rating', 0) > 0 %}
+        <div class="card-rating" style="display:flex;align-items:center;gap:4px;margin:4px 0;">
+          {% for i in range(5) %}
+            {% if i < m.get('avg_rating', 0)|round %}
+              <span style="color:#fbbf24;font-size:14px;">★</span>
+            {% else %}
+              <span style="color:#e5e7eb;font-size:14px;">☆</span>
+            {% endif %}
+          {% endfor %}
+          <span style="color:#666;font-size:12px;margin-left:4px;">({{ m.get('avg_rating', 0)|round(1) }})</span>
+        </div>
+      {% endif %}
+      <p class="card-desc">{{ (m.get('description') or 'Опис відсутній')[:120] }}{% if m.get('description') and m.get('description')|length > 120 %}...{% endif %}</p>
+      <div style="margin-top:8px;color:var(--muted);font-size:13px">{{ m.get('manufacturer_name') or '' }} — {{ m.get('category_name') or '' }}</div>
+    </div>
+    <div class="card-actions" onclick="event.stopPropagation()" style="display:flex;gap:8px;margin-top:8px;">
+      {% if m.get('prescription_required') %}
+        <form method="post" action="/bookings/cart/add" style="flex: 1; margin: 0;">
+          <input type="hidden" name="medicine_id" value="{{ m.get('medicine_id') }}">
+          <input type="hidden" name="quantity" value="1">
+          <button class="btn primary" type="submit" style="width:100%;padding:10px;background:#16a34a;color:white;border:none;border-radius:5px;font-weight:bold;cursor:pointer;transition:background 0.2s;">Бронювати</button>
+        </form>
+      {% else %}
+        <form method="post" action="/cart/add" style="flex: 1; margin: 0;">
+          <input type="hidden" name="medicine_id" value="{{ m.get('medicine_id') }}">
+          <input type="hidden" name="quantity" value="1">
+          <button class="btn primary" type="submit" style="width: 100%;padding:10px;background:#16a34a;color:white;border-radius:5px;border:none;cursor:pointer;font-weight:bold;transition:background 0.2s;">Додати</button>
+        </form>
+      {% endif %}
+      <a class="btn" href="/medicine/{{ m.get('medicine_id') }}" onclick="event.stopPropagation()" style="flex:0.7;padding:10px;background:#e5e7eb;border-radius:5px;text-decoration:none;text-align:center;border:none;cursor:pointer;font-weight:500;transition:background 0.2s;">Деталі</a>
+    </div>
+  </article>
+{% else %}
+  <div style="text-align: center; padding: 40px; color: #666;">
+    <h3>Ліки не знайдені</h3>
+    <p>Спробуйте змінити фільтри або пошуковий запит</p>
+  </div>
+{% endfor %}

@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="auth-wrapper">
+  
+  <div class="auth-box {% if show_register %}active{% endif %}" id="authBox">
+    
+    <div class="form-container sign-up">
+      <form method="post" action="/register">
+        <h2>Створити акаунт</h2>
+        <input type="text" name="full_name" placeholder="ПІБ" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Пароль" required>
+        <input type="tel" name="phone" placeholder="Телефон">
+        <input type="text" name="city" placeholder="Місто">
+        <input type="text" name="address" placeholder="Адреса">
+        <button type="submit">Зареєструватися</button>
+      </form>
+    </div>
+
+    <div class="form-container sign-in">
+      <form method="post" action="/login">
+        <h2>Вхід</h2>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Пароль" required>
+        <a href="/admin/login" class="admin-link" style="display:block;margin:8px 0;color:#16a34a;font-size:12px;">Я адмін</a>
+        <button type="submit">Увійти</button>
+      </form>
+    </div>
+
+    <div class="toggle-container">
+      <div class="toggle">
+        
+        <div class="toggle-panel toggle-left">
+          <h1>Вітаємо!</h1>
+          <p>Вже є аккаунт?</p>
+          <button class="ghost" id="loginBtn">Вхід</button>
+        </div>
+        
+        <div class="toggle-panel toggle-right">
+          <h1>Вітаємо!</h1>
+          <p>Зареєструйтесь, якщо ще не маєте аккаунту</p>
+          <button class="ghost" id="registerBtn">Реєстрація</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  header, nav, .navbar, .menu, .header {
+      z-index: 99999 !important;
+      position: relative;
+  }
+
+  .auth-wrapper {
+    background: linear-gradient(to right, #e0f2e9, #c9f0d6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    min-height: 85vh; 
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 0; 
+  }
+
+  .auth-box {
+    background-color: #fff;
+    border-radius: 30px;
+    box-shadow: 0 5px 30px rgba(15, 42, 18, 0.2);
+    position: relative;
+    overflow: hidden;
+    width: 850px;
+    max-width: 100%;
+    min-height: 600px;
+    z-index: 1; 
+  }
+
+  .auth-box p {
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.3px;
+    margin: 20px 0;
+    color: #666;
+  }
+
+  .auth-box a {
+    color: #1fbd56;
+    font-size: 13px;
+    text-decoration: none;
+    margin: 15px 0 10px;
+    transition: color 0.3s;
+  }
+
+  .auth-box a:hover {
+    color: #0c6402;
+  }
+
+  .auth-box button {
+    background: linear-gradient(135deg, #1fbd56, #0c6402);
+    color: #fff;
+    font-size: 12px;
+    padding: 10px 45px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .auth-box button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(31, 189, 86, 0.4);
+  }
+
+  .auth-box button.ghost {
+    background-color: transparent;
+    border: 2px solid #fff;
+  }
+
+  .auth-box button.ghost:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .auth-box form {
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 40px;
+    height: 100%;
+    text-align: center;
+  }
+
+  .auth-box input {
+    background-color: #f3f4f6;
+    border: none;
+    margin: 8px 0;
+    padding: 10px 15px;
+    font-size: 13px;
+    border-radius: 8px;
+    width: 100%;
+    outline: none;
+    transition: all 0.3s;
+    box-sizing: border-box;
+  }
+
+  .auth-box input:focus {
+    background-color: #e8f5ee;
+    box-shadow: 0 0 0 2px rgba(31, 189, 86, 0.2);
+  }
+
+  .form-container {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.6s ease-in-out;
+  }
+
+  .sign-in {
+    left: 0;
+    width: 50%;
+    z-index: 2;
+  }
+
+  .auth-box.active .sign-in {
+    transform: translateX(100%);
+  }
+
+  .sign-up {
+    left: 0;
+    width: 50%;
+    opacity: 0;
+    z-index: 1;
+  }
+
+  .auth-box.active .sign-up {
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5;
+    animation: show 0.6s;
+  }
+
+  @keyframes show {
+    0%, 49.99% { opacity: 0; z-index: 1; }
+    50%, 100% { opacity: 1; z-index: 5; }
+  }
+
+  .toggle-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: all 0.6s ease-in-out;
+    border-radius: 150px 0 0 100px;
+    z-index: 10; 
+  }
+
+  .auth-box.active .toggle-container {
+    transform: translateX(-100%);
+    border-radius: 0 150px 100px 0;
+  }
+
+  .toggle {
+    background: linear-gradient(to right, #1fbd56, #0c6402);
+    height: 100%;
+    color: #fff;
+    position: relative;
+    left: -100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+  }
+
+  .auth-box.active .toggle {
+    transform: translateX(50%);
+  }
+
+  .toggle-panel {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 30px;
+    text-align: center;
+    top: 0;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+  }
+
+  .toggle-panel p {
+      color: #fff !important;
+      margin-bottom: 25px;
+  }
+
+  .toggle-left { transform: translateX(-200%); }
+  .auth-box.active .toggle-left { transform: translateX(0); }
+  .toggle-right { right: 0; transform: translateX(0); }
+  .auth-box.active .toggle-right { transform: translateX(200%); }
+
+  .auth-box h2 { color: #1e3b2a; margin-bottom: 10px; }
+  .auth-box h1 { color: #fff; margin-bottom: 10px; font-size: 28px; line-height: 1.2; }
+</style>
+
+<script>
+  const authBox = document.getElementById('authBox');
+  const registerBtn = document.getElementById('registerBtn');
+  const loginBtn = document.getElementById('loginBtn');
+
+  if(registerBtn && loginBtn && authBox){
+      registerBtn.addEventListener('click', () => {
+        authBox.classList.add('active');
+      });
+
+      loginBtn.addEventListener('click', () => {
+        authBox.classList.remove('active');
+      });
+  }
+</script>
+
+{% endblock %}

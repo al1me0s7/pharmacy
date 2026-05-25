@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <h1 style="margin:0;">Управління аптеками</h1>
+    <a href="{{ url_for('admin_dashboard.admin_dashboard') }}" class="btn"
+        style="background:#16a34a;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;border:none;cursor:pointer;">←
+        На панель</a>
+</div>
+<div class="admin-container">
+
+    <div class="form-card" style="margin-bottom: 30px;">
+        <h3>Додати нову аптеку</h3>
+        <form method="POST" action="{{ url_for('admin_pharmacies.admin_pharmacies_add') }}">
+            <div class="form-row">
+                <input type="text" name="pharmacy_name" placeholder="Назва аптеки" required>
+                <select name="city_id">
+                    <option value="">Виберіть місто</option>
+                    {% for city in cities %}
+                    <option value="{{ city.city_id }}">{{ city.city_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row">
+                <input type="text" name="address" placeholder="Адреса" required>
+                <input type="text" name="working_hours" placeholder="Час роботи (9:00-21:00)">
+            </div>
+            <div class="form-row">
+                <input type="phone" name="contact_phone" placeholder="+38 (0xx) xxx-xx-xx" required>
+                <input type="email" name="email" placeholder="email@pharmacy.ua">
+            </div>
+            <div class="form-row" style="display:flex;align-items:center;">
+                <label style="display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" name="has_delivery" style="width:18px;height:18px;">
+                    <span>Доставка доступна</span>
+                </label>
+            </div>
+            <button type="submit" class="btn-primary">Додати аптеку</button>
+        </form>
+    </div>
+
+    <h3>Список аптек</h3>
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Назва</th>
+                <th>Місто</th>
+                <th>Адреса</th>
+                <th>Телефон</th>
+                <th>Час роботи</th>
+                <th>Доставка</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in pharmacies %}
+            <tr>
+                <td><strong>{{ p.pharmacy_name }}</strong></td>
+                <td>{{ p.city_name or '—' }}</td>
+                <td>{{ p.address }}</td>
+                <td><a href="tel:{{ p.contact_phone }}">{{ p.contact_phone }}</a></td>
+                <td>{{ p.working_hours or '—' }}</td>
+                <td>{{ 'Так' if p.has_delivery else 'Ні' }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('admin_pharmacies.admin_pharmacies_edit', pid=p.pharmacy_id) }}"
+                        style="display:inline;">
+                        <input type="hidden" name="city_id" value="{{ p.city_id or '' }}">
+                        <input type="hidden" name="pharmacy_name" value="{{ p.pharmacy_name }}">
+                        <input type="hidden" name="address" value="{{ p.address }}">
+                        <input type="hidden" name="working_hours" value="{{ p.working_hours or '' }}">
+                        <input type="hidden" name="contact_phone" value="{{ p.contact_phone }}">
+                        <input type="hidden" name="email" value="{{ p.email or '' }}">
+                        <input type="hidden" name="has_delivery" value="{{ 'on' if p.has_delivery else '' }}">
+                        <a href="{{ url_for('admin_pharmacies.admin_pharmacies_edit', pid=p.pharmacy_id) }}" class="btn-edit">Редагувати</a>
+                    <form method="POST" action="{{ url_for('admin_pharmacies.admin_pharmacies_delete', pid=p.pharmacy_id) }}"
+                        style="display:inline;">
+                        <button type="submit" class="btn-delete"
+                            onclick="return confirm('Видалити аптеку?');">Видалити</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align:center;">Аптеки не знайдені</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .admin-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .form-card {
+        background: #f5f5f5;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .form-row input,
+    .form-row select {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .form-row input:focus,
+    .form-row select:focus {
+        outline: none;
+        border-color: #16a34a;
+    }
+
+    .btn-primary {
+        background: #16a34a;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-primary:hover {
+        background: #159940;
+    }
+
+    .btn-edit,
+    .btn-delete {
+        padding: 5px 10px;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .btn-edit {
+        text-decoration: none;
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-delete {
+        background: #ef4444;
+        color: white;
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .admin-table thead {
+        background: #16a34a;
+        color: white;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .admin-table tbody tr:hover {
+        background: #f9f9f9;
+    }
+</style>
+{% endblock %}

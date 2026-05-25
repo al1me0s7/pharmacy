@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="background: linear-gradient(to right, #e0f2e9, #c9f0d6); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+  
+  <div class="form-card" style="background: #fff; border-radius: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); padding: 40px; width: 400px; text-align: center;">
+    <h2 style="color: #0c6402; margin-bottom: 30px; font-weight: bold;">Адмінка</h2>
+    
+    <form method="post">
+      <div class="form-group" style="margin-bottom: 20px; text-align: left;">
+        <label style="font-size: 12px; color: #666; margin-left: 5px;">Логін</label>
+        <input type="text" name="login" required 
+               style="width: 100%; padding: 12px 15px; margin-top: 5px; background: #f3f4f6; border: none; border-radius: 8px; outline: none; box-sizing: border-box;">
+      </div>
+      
+      <div class="form-group" style="margin-bottom: 25px; text-align: left;">
+        <label style="font-size: 12px; color: #666; margin-left: 5px;">Пароль</label>
+        <input type="password" name="password" required 
+               style="width: 100%; padding: 12px 15px; margin-top: 5px; background: #f3f4f6; border: none; border-radius: 8px; outline: none; box-sizing: border-box;">
+      </div>
+      
+      <button type="submit" 
+              style="background: linear-gradient(135deg, #1fbd56, #0c6402); color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;">
+        Вхід
+      </button>
+    </form>
+    
+    <p style="margin-top: 20px;">
+      <a href="/" style="color: #1fbd56; text-decoration: none; font-size: 13px;">На головну</a>
+    </p>
+  </div>
+  
+</div>
+{% endblock %}

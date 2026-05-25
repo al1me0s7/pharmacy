@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 2rem;">
+  <h2>Редагувати лік: {{ med.name }}</h2>
+  
+  <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    
+    <form method="post" enctype="multipart/form-data" id="edit-form">
+      <style>
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #333; }
+        .form-group input, .form-group select, .form-group textarea { 
+          width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; 
+          font-size: 14px; box-sizing: border-box; font-family: inherit;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+          outline: none; border-color: #1fbd56; box-shadow: 0 0 0 2px rgba(31,189,86,0.1);
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .section-title { 
+          font-size: 12px; font-weight: 600; color: #1fbd56; 
+          margin-top: 1.5rem; margin-bottom: 0.8rem; text-transform: uppercase; 
+        }
+        .checkbox-group { display: flex; align-items: center; gap: 8px; }
+        .checkbox-group input { width: auto; }
+        .btn-group { display: flex; gap: 1rem; margin-top: 2rem; }
+        .btn { padding: 10px 20px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .btn.primary { background: #16a34a; color: white; border-color: #16a34a; }
+        .btn.danger { background: #ef4444; color: white; border-color: #ef4444; }
+        .btn:hover { opacity: 0.9; }
+        .image-preview { margin-top: 1rem; }
+        .image-preview img { 
+          width: 120px; 
+          height: 120px; 
+          object-fit: cover; 
+          object-position: center; 
+          border-radius: 6px; 
+          border: 1px solid #eee;
+          background: #fafafa;
+        }
+      </style>
+
+      <div class="section-title">Основна інформація</div>
+      
+      <div class="form-group">
+        <label for="name">Назва ліку:</label>
+        <input type="text" id="name" name="name" required value="{{ med.name }}" autocomplete="off">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="category_id">Категорія:</label>
+          <select id="category_id" name="category_id">
+            <option value="">-- Оберіть --</option>
+            {% for cat in categories %}
+              <option value="{{ cat.category_id }}" {% if cat.category_id == med.category_id %}selected{% endif %}>
+                {{ cat.category_name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="manufacturer_id">Виробник:</label>
+          <select id="manufacturer_id" name="manufacturer_id">
+            <option value="">-- Оберіть --</option>
+            {% for mf in manufacturers %}
+              <option value="{{ mf.manufacturer_id }}" {% if mf.manufacturer_id == med.manufacturer_id %}selected{% endif %}>
+                {{ mf.manufacturer_name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Опис:</label>
+        <textarea id="description" name="description" autocomplete="off">{{ med.description or '' }}</textarea>
+      </div>
+
+      <div class="section-title">Фармацевтичні дані</div>
+
+      <div class="form-group">
+        <label for="active_substance">Активна речовина:</label>
+        <input type="text" id="active_substance" name="active_substance" value="{{ med.active_substance or '' }}" autocomplete="off">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dosage_value">Дозування:</label>
+          <input type="text" id="dosage_value" name="dosage_value" placeholder="500мг, 10мл..." value="{{ med.dosage_value or '' }}" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="dosage_form">Форма випуску:</label>
+          <input type="text" id="dosage_form" name="dosage_form" placeholder="таблетки, капсули..." value="{{ med.dosage_form or '' }}" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="composition">Склад:</label>
+        <textarea id="composition" name="composition" autocomplete="off">{{ med.composition or '' }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="usage_instructions">Способ застосування:</label>
+        <textarea id="usage_instructions" name="usage_instructions" autocomplete="off">{{ med.usage_instructions or '' }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="contraindications">Протипоказання:</label>
+        <textarea id="contraindications" name="contraindications" autocomplete="off">{{ med.contraindications or '' }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="storage_conditions">Умови зберігання:</label>
+        <textarea id="storage_conditions" name="storage_conditions" autocomplete="off">{{ med.storage_conditions or '' }}</textarea>
+      </div>
+
+      <div class="section-title">Ціна та наявність</div>
+
+      <div class="form-group">
+        <label for="price">Ціна (грн):</label>
+        <input type="number" id="price" name="price" step="0.01" required value="{{ med.price or 0 }}" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label for="quantity_in_stock">Запас (шт.):</label>
+        <input type="number" id="quantity_in_stock" name="quantity_in_stock" step="1" min="0" value="{{ med.quantity_in_stock or 0 }}" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label for="expiration_date">Термін придатності:</label>
+        <input type="date" id="expiration_date" name="expiration_date" value="{{ med.expiration_date.strftime('%Y-%m-%d') if med.expiration_date else '' }}" autocomplete="off">
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="prescription_required" name="prescription_required" {% if med.prescription_required %}checked{% endif %}>
+        <label for="prescription_required" style="margin-bottom: 0;">Потребує рецепту</label>
+      </div>
+
+      <div class="section-title">Фото</div>
+
+      {% if med.image %}
+        <div class="image-preview">
+          <p style="font-size: 12px; color: #666;">Поточне фото:</p>
+          <img src="{{ med.image }}" alt="{{ med.name }}">
+        </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label for="image">Завантажити нове фото:</label>
+        <input type="file" id="image" name="image" accept="image/*">
+        <small style="color: #999;">Залишіть пусто щоб зберегти поточне фото</small>
+      </div>
+
+      <div class="section-title">Аптеки та ціни</div>
+      
+      {% if existing_prices %}
+      <div style="margin-bottom: 15px;">
+        <button type="button" id="toggle-edit-pharmacies-btn" style="background:#6b7280;color:white;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;">Показати аптеки для редагування ({{ existing_prices|length }})</button>
+      </div>
+      {% endif %}
+      
+      <div id="edit-pharmacies-container" style="{% if existing_prices %}display:none;{% else %}display:block;{% endif %}">
+        <div id="pharmacies-container">
+          {% for price in existing_prices %}
+          <div class="pharmacy-entry" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+            <select name="cities[]" style="width:150px;padding:8px;border:1px solid #e6e9ef;border-radius:6px;" onchange="updatePharmacies(this, {{ loop.index }})">
+              <option value="">Оберіть місто</option>
+              {% for city in cities %}
+                <option value="{{ city.city_id }}" {% if city.city_id == price.city_id %}selected{% endif %}>{{ city.city_name }}</option>
+              {% endfor %}
+            </select>
+            <select name="pharmacy_ids[]" style="width:200px;padding:8px;border:1px solid #e6e9ef;border-radius:6px;" id="pharmacy-{{ loop.index }}">
+              <option value="">Оберіть аптеку</option>
+              {% for pharmacy in pharmacies %}
+                {% if pharmacy.city_id == price.city_id %}
+                  <option value="{{ pharmacy.pharmacy_id }}" {% if pharmacy.pharmacy_id == price.pharmacy_id %}selected{% endif %}>{{ pharmacy.pharmacy_name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            <input type="number" name="inventory_prices[]" step="0.01" value="{{ price.price }}" placeholder="Ціна" style="width:100px;padding:8px;border:1px solid #e6e9ef;border-radius:6px;">
+            <button type="button" onclick="removePharmacy(this)" style="background:#ef4444;color:white;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;">×</button>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="button" id="add-pharmacy-btn" style="background:#16a34a;color:white;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;margin-top:10px;">+ Додати аптеку</button>
+      </div>
+
+      <div class="btn-group">
+        <a href="/admin/medicines" class="btn">Назад</a>
+        <button type="submit" class="btn primary">Зберегти зміни</button>
+        <button type="button" class="btn danger" id="delete-btn">Видалити</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('delete-btn').addEventListener('click', function(){
+      if(confirm('Ви впевнені що хочете видалити цей лік?')){
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/medicines/{{ med.medicine_id }}/delete';
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+
+    const container = document.getElementById('pharmacies-container');
+    const addBtn = document.getElementById('add-pharmacy-btn');
+    let pharmacyCount = {{ existing_prices|length }};
+
+    let cities = {{ cities|tojson }};
+    let pharmacies = {{ pharmacies|tojson }};
+
+    function createPharmacyEntry() {
+      pharmacyCount++;
+      const entry = document.createElement('div');
+      entry.className = 'pharmacy-entry';
+      entry.style.cssText = 'display:flex;gap:10px;align-items:center;margin-bottom:10px;padding:10px;border:1px solid #e6e9ef;border-radius:6px;';
+      
+      entry.innerHTML = `
+        <select name="cities[]" style="width:150px;padding:8px;border:1px solid #e6e9ef;border-radius:6px;" onchange="updatePharmacies(this, ${pharmacyCount})">
+          <option value="">Оберіть місто</option>
+          ${cities.map(city => `<option value="${city.city_id}">${city.city_name}</option>`).join('')}
+        </select>
+        <select name="pharmacy_ids[]" style="width:200px;padding:8px;border:1px solid #e6e9ef;border-radius:6px;" id="pharmacy-${pharmacyCount}">
+          <option value="">Оберіть аптеку</option>
+        </select>
+        <input type="number" name="inventory_prices[]" step="0.01" placeholder="Ціна" style="width:100px;padding:8px;border:1px solid #e6e9ef;border-radius:6px;">
+        <button type="button" onclick="removePharmacy(this)" style="background:#ef4444;color:white;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;">×</button>
+      `;
+      
+      container.appendChild(entry);
+      return entry;
+    }
+
+    window.updatePharmacies = function(select, count) {
+      const cityId = select.value;
+      const pharmacySelect = document.getElementById(`pharmacy-${count}`);
+      
+      pharmacySelect.innerHTML = '<option value="">Оберіть аптеку</option>';
+      
+      const cityPharmacies = pharmacies.filter(p => p.city_id == cityId);
+      cityPharmacies.forEach(pharmacy => {
+        const option = document.createElement('option');
+        option.value = pharmacy.pharmacy_id;
+        option.textContent = pharmacy.pharmacy_name;
+        pharmacySelect.appendChild(option);
+      });
+    };
+
+    window.removePharmacy = function(btn) {
+      btn.closest('.pharmacy-entry').remove();
+    };
+
+    if (addBtn) {
+      addBtn.addEventListener('click', createPharmacyEntry);
+    }
+
+    const toggleEditBtn = document.getElementById('toggle-edit-pharmacies-btn');
+    const editContainer = document.getElementById('edit-pharmacies-container');
+    if (toggleEditBtn && editContainer) {
+      toggleEditBtn.addEventListener('click', function() {
+        if (editContainer.style.display === 'none') {
+          editContainer.style.display = 'block';
+          toggleEditBtn.textContent = 'Сховати аптеки для редагування';
+        } else {
+          editContainer.style.display = 'none';
+          toggleEditBtn.textContent = 'Показати аптеки для редагування (' + {{ existing_prices|length }} + ')';
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

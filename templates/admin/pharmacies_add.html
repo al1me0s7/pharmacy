@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width:800px;margin:40px auto;padding:20px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+    <h1>Додати нову аптеку</h1>
+    <a href="{{ url_for('admin_pharmacies.admin_pharmacies') }}" class="btn" style="background:#16a34a;color:white;">←</a>
+  </div>
+
+  <div style="background:white;border:2px solid #16a34a;border-radius:12px;padding:30px;box-shadow:0 2px 8px rgba(22,163,74,0.1);">
+    <form method="post">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Назва аптеки *</label>
+          <input type="text" name="pharmacy_name" required style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Адреса *</label>
+          <input type="text" name="address" required style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Телефон</label>
+          <input type="text" name="phone_number" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+
+        <div>
+          <label style="display:block;font-weight:bold;color:#16a34a;margin-bottom:8px;">Години роботи</label>
+          <input type="text" name="working_hours" placeholder="Напр.: 9:00-21:00" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:6px;">
+        </div>
+      </div>
+
+      <div style="text-align:center;">
+        <button type="submit" style="background:#16a34a;color:white;border:none;padding:12px 30px;border-radius:6px;font-weight:bold;cursor:pointer;">Додати аптеку</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

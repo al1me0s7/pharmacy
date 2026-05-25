@@ -1,0 +1,30 @@
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Ім'я</th>
+        <th>Email</th>
+        <th>Телефон</th>
+        <th>Місто</th>
+        <th>Дії</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.user_id }}</td>
+        <td><strong>{{ user.full_name }}</strong></td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.phone_number or '—' }}</td>
+        <td>{{ user.city or '—' }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('admin_users.admin_user_delete', uid=user.user_id) }}" style="display:inline;">
+            <button type="submit" class="btn-delete" onclick="return confirm('Видалити користувача?');">Видалити</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center;">Користувачів не знайдено</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>

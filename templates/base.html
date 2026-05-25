@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Аптека</title>
+    <link rel="stylesheet" href="/static/style.css?v=2">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css">
+    <style>
+      .form-group { margin-bottom: 1.2rem; }
+      .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
+      .form-group input, .form-group select, .form-group textarea { 
+        width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; 
+        font-size: 14px; box-sizing: border-box; 
+      }
+      .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+        outline: none; border-color: #1fbd56; box-shadow: 0 0 0 2px rgba(31,189,86,0.1);
+      }
+      .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .section-title { 
+        font-size: 13px; font-weight: 600; color: #1fbd56; 
+        margin-top: 1.5rem; margin-bottom: 0.8rem; text-transform: uppercase;
+      }
+      .conditional-group { display: none; }
+      .conditional-group.active { display: block; }
+      /* Tom Select styles */
+      .ts-control { border: 1px solid #e5e7eb !important; border-radius: 8px !important; }
+      .ts-control:focus { border-color: #1fbd56 !important; box-shadow: 0 0 0 2px rgba(31,189,86,0.1) !important; }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="logo"><a href="/"><img src="/static/images/pharmacy.png" alt="Pharmacy" style="height: 40px; width: auto;"></a></div>
+        <nav class="main-nav">
+          <a href="/">Головна</a>
+          <a href="/my_orders">Замовлення</a>
+          <a href="/my_bookings">Бронювання</a>
+          <a href="/profile">Профіль</a>
+        </nav>
+        <div class="auth">
+          <a class="cart-link" href="/cart" aria-label="Кошик" title="Кошик">
+            <img src="/static/images/basket.png" alt="Кошик" style="height: 38px; width: 38px; margin-right: 8px;">
+            <span id="cart-badge" class="badge" style="background:#16a34a;color:#fff;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:bold;">{{ cart_count or 0 }}</span>
+          </a>
+          {% if current_user %}
+            <span class="user-name">{{ current_user.full_name or current_user.email }}</span>
+            <a class="btn small" href="/logout">Вийти</a>
+          {% else %}
+            <a class="btn" href="/login">Увійти</a>
+            <a class="btn primary" href="/register">Реєстрація</a>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <ul class="flashes">
+          {% for m in messages %}
+            <li>{{ m }}</li>
+          {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">© Аптека</div>
+    </footer>
+
+    <!-- МОДАЛЬНЕ ВІКНО КОШИКА -->
+    <div id="cart-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+      <div class="modal-content" style="background: white; border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h3 style="margin: 0;">🛒</h3>
+          <button type="button" onclick="closeCartModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">✕</button>
+        </div>
+        <div id="modal-cart-items" style="margin-bottom: 1.5rem;"></div>
+        <div id="modal-cart-total" style="font-size: 18px; font-weight: bold; margin-bottom: 1.5rem; color: #2563eb;">Всього: 0 грн</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <button type="button" onclick="closeCartModal()" class="btn">Продовжити покупки</button>
+          <a href="/cart/checkout" class="btn primary">Оформити</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+    <script>
+      // МОДАЛЬ КОШИКА
+      function closeCartModal(){
+        const modal = document.getElementById('cart-modal');
+        if(modal) modal.style.display = 'none';
+      }
+      
+      function openCartModal(items, total){
+        const modal = document.getElementById('cart-modal');
+        const itemsDiv = document.getElementById('modal-cart-items');
+        itemsDiv.innerHTML = '';
+        items.forEach(item => {
+          const div = document.createElement('div');
+          div.style.cssText = 'padding: 12px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;';
+          const itemPrice = (item.price * item.qty).toFixed(2);
+          div.innerHTML = `<div><strong>${item.name}</strong><br/><small>Кількість: ${item.qty} × ${item.price.toFixed(2)} грн</small></div><div style="text-align: right;"><strong>${itemPrice} грн</strong></div>`;
+          itemsDiv.appendChild(div);
+        });
+        document.getElementById('modal-cart-total').textContent = `Всього: ${total.toFixed(2)} грн`;
+        if(modal) modal.style.display = 'flex';
+      }
+
+      // Закрити модаль коли клікнути на фон
+      document.addEventListener('click', function(e){
+        const modal = document.getElementById('cart-modal');
+        if(e.target === modal) closeCartModal();
+      });
+      document.addEventListener('DOMContentLoaded', function(){
+        try{
+          document.querySelectorAll('select.ts-select').forEach(function(el){
+            if(!el.tomselect) new TomSelect(el, {create:false, sortField:{field:'text'}});
+          });
+        }catch(e){ console.warn('TomSelect init error', e); }
+      });
+      
+      // Підключення форм додавання в кошик
+      function bindCartForms(){
+        const badge = document.getElementById('cart-badge');
+        document.querySelectorAll('form[action="/cart/add"]').forEach(function(f){
+          // усунення подвійного прив'язування
+          if(f._bound) return; f._bound = true;
+          f.addEventListener('submit', async function(ev){
+            try{
+              ev.preventDefault();
+              const fd = new FormData(f);
+              const res = await fetch(f.action, { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } });
+              if(res && res.ok){
+                const data = await res.json().catch(()=>null);
+                if(data && data.cart_count!==undefined && badge){ 
+                  badge.textContent = data.cart_count;
+                  // Показити модаль
+                  if(data.items && data.total) openCartModal(data.items, data.total);
+                }
+              } else {
+                const data = await res.json().catch(()=>null);
+                if(data && data.error){ alert(data.message || 'Помилка'); }
+                else { window.location.reload(); }
+              }
+            }catch(e){ console.warn(e); }
+          });
+        });
+      }
+      document.addEventListener('DOMContentLoaded', bindCartForms);
+    </script>
+  </body>
+</html>

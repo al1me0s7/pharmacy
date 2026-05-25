@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="product-detail">
+    <div class="media">
+      <img alt="{{ med.get('name') }}" src="{{ med.get('image') or '/static/images/placeholder.svg' }}">
+    </div>
+    <div class="info">
+      <h1>{{ med.get('name') }}</h1>
+      <p class="price"><span id="unit-price">{{ med.get('price') }}</span> грн</p>
+      {% if med.get('avg_rating', 0) and med.get('avg_rating', 0) > 0 %}
+        <div style="display:flex;align-items:center;gap:6px;margin:8px 0;">
+          {% for i in range(5) %}
+            {% if i < med.get('avg_rating')|round %}
+              <span style="color:#fbbf24;font-size:16px;">★</span>
+            {% else %}
+              <span style="color:#e5e7eb;font-size:16px;">☆</span>
+            {% endif %}
+          {% endfor %}
+          <span style="color:#666;font-size:13px;">({{ med.get('avg_rating')|round(1) }})</span>
+        </div>
+      {% endif %}
+      <p>{{ med.get('description') }}</p>
+      <p>Рецепт: {{ 'так' if med.get('prescription_required') else 'ні' }}</p>
+      {% if med.get('prescription_required') %}
+      <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #dc2626;">
+        <strong style="color: #991b1b;">РЕЦЕПТУРНИЙ ПРЕПАРАТ</strong>
+        <p style="margin: 8px 0 0 0; font-size: 14px;">Рецептурний препарат. При наявності у кошику разом з нерецептурними вибір способу доставки буде недоступний - тільки самовивіз з аптеки.</p>
+      </div>
+      {% endif %}
+      <div class="actions">
+        <form method="post" action="/cart/add" style="display:flex;gap:8px;align-items:center" id="addCartForm">
+          <input type="hidden" name="medicine_id" value="{{ med.get('medicine_id') }}">
+          <input type="number" name="quantity" value="1" min="1" style="width:80px;padding:8px;border-radius:8px;border:1px solid #e6e9ef;">
+          <button class="btn primary" type="submit" style="background:#16a34a;color:white;padding:10px 20px;border:none;border-radius:6px;font-weight:bold;cursor:pointer;transition:background 0.2s;">Додати в кошик</button>
+        </form>
+        <a class="btn" href="/medicine/{{ med.get('medicine_id') }}/prices{% if session.get('selected_city_id') %}?city_id={{ session.get('selected_city_id') }}{% endif %}" style="background:#0066cc;color:white;padding:10px 20px;border:none;border-radius:6px;font-weight:bold;text-decoration:none;display:inline-block;transition:background 0.2s;">Переглянути ціни в аптеках</a>
+      </div>
+
+      <div class="accordion">
+        <button class="acc-btn">Показати деталі</button>
+        <div class="acc-panel">
+          <h4>Активна речовина</h4>
+          <p>{{ med.get('active_substance') or 'Немає даних' }}</p>
+          <h4>Форма та доза</h4>
+          <p>
+            {{ (med.get('dosage_form') or '') }}
+            {% if med.get('dosage_form') and med.get('dosage_value') %} по {% endif %}
+            {{ (med.get('dosage_value') or '') }}
+          </p>
+          <h4>Склад</h4>
+          <p>{{ med.get('composition') or 'Немає даних' }}</p>
+          <h4>Інструкції з застосування</h4>
+          <p>{{ med.get('usage_instructions') or 'Немає даних' }}</p>
+          <h4>Протипоказання</h4>
+          <p>{{ med.get('contraindications') or 'Немає даних' }}</p>
+          <h4>Умови зберігання</h4>
+          <p>{{ med.get('storage_conditions') or 'Немає даних' }}</p>
+          <h4>Термін придатності</h4>
+          <p>{{ med.get('expiration_date') or 'Немає даних' }}</p>
+          <h4>Запас на складі</h4>
+          <p>{{ med.get('quantity_in_stock') or 0 }} шт.</p>
+          <h4>Виробник</h4>
+          <p>{{ med.get('manufacturer_name') or 'Невідомо' }}</p>
+          <h4>Категорія</h4>
+          <p>{{ med.get('category_name') or 'Невідомо' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ВІДГУКИ -->
+  <div style="margin-top: 40px;">
+    <h3>Відгуки</h3>
+    {% if reviews %}
+      {% for review in reviews %}
+      <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong>{{ review.full_name }}</strong>
+          <div class="review-stars">
+            {% for i in range(5) %}
+              <span class="star {% if i < review.rating %}filled{% endif %}">{{ '★' if i < review.rating else '☆' }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <p>{{ review.comment }}</p>
+        <small style="color: #666;">{{ review.created_at }}</small>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p>Відгуків поки немає.</p>
+    {% endif %}
+    
+    {% if current_user %}
+    <h4>Залишити відгук</h4>
+    <form method="post" action="/medicine/{{ med.medicine_id }}/review" style="border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+      <div style="margin-bottom: 10px;">
+        <label>Рейтинг:</label>
+        <div class="star-rating">
+          <input type="hidden" name="rating" id="rating-input" required>
+          <span class="star" data-value="1">☆</span>
+          <span class="star" data-value="2">☆</span>
+          <span class="star" data-value="3">☆</span>
+          <span class="star" data-value="4">☆</span>
+          <span class="star" data-value="5">☆</span>
+        </div>
+      </div>
+      <div style="margin-bottom: 10px;">
+        <label>Коментар:</label>
+        <textarea name="comment" rows="3" style="width: 100%;"></textarea>
+      </div>
+      <button type="submit" style="background: #16a34a; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Надіслати</button>
+    </form>
+    {% else %}
+    <p><a href="/login">Увійдіть</a> щоб залишити відгук.</p>
+    {% endif %}
+  </div>
+
+ <style>
+  .review-stars .star {
+    font-size: 20px;
+    color: #16a34a;
+    display: inline-block;
+    line-height: 1;
+    margin-right: 2px;
+  }
+
+  .review-stars .star.filled {
+    color: #16a34a;
+  }
+
+  .star-rating .star {
+    font-size: 22px;
+    color: #16a34a;
+    cursor: pointer;
+    display: inline-block;
+    line-height: 1;
+    margin: 0 2px;
+  }
+
+  .star-rating .star.filled {
+    color: #16a34a;
+  }
+</style>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var btn = document.querySelector('.acc-btn');
+    var panel = document.querySelector('.acc-panel');
+    if(btn && panel){
+      panel.style.maxHeight = '0px';
+      panel.style.overflow = 'hidden';
+      panel.style.transition = 'max-height 0.3s ease';
+      
+      btn.addEventListener('click', function(){
+        if(panel.style.maxHeight && panel.style.maxHeight !== '0px'){
+          panel.style.maxHeight = '0px';
+          btn.textContent = 'Показати деталі';
+        } else {
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+          btn.textContent = 'Сховати деталі';
+        }
+      });
+    }
+
+    const stars = document.querySelectorAll(".star-rating .star");
+    const ratingInput = document.getElementById("rating-input");
+
+    stars.forEach(star => {
+      star.addEventListener("click", function () {
+        const value = this.dataset.value;
+
+        // зберігаємо вибране значення
+        ratingInput.value = value;
+
+        // перефарбовуємо всі зірки
+        stars.forEach(s => s.textContent = "☆");
+        for (let i = 0; i < value; i++) {
+          stars[i].textContent = "★";
+        }
+      });
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Мої бронювання</h2>
+
+<p style="margin-bottom: 2rem;"><a href="/" class="btn">←</a></p>
+
+{% if not bookings %}
+  <p style="color: #999; padding: 2rem; background: #f9fafb; border-radius: 8px;">У вас ще немає бронювань</p>
+{% else %}
+  <div style="display: grid; gap: 1.5rem;">
+    {% for booking in bookings %}
+    <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.5rem;">
+      <div style="display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 2rem; margin-bottom: 1rem;">
+        <div>
+          <h3 style="margin: 0 0 8px 0;">Бронювання #{{ booking.booking_id }}</h3>
+
+          <p style="margin: 0; color: #666; font-size: 14px;">
+            {{ booking.booking_date.strftime('%Y-%m-%d %H:%M:%S') if booking.booking_date else '' }}
+          </p>
+
+          <p style="margin: 8px 0 0 0; color: #666;">Препарат: <strong>{{ booking.medicine_name }}</strong></p>
+          <p style="margin: 4px 0 0 0; color: #666;">Аптека: <strong>{{ booking.pharmacy_name }}</strong></p>
+
+          {% if booking.pickup_deadline %}
+          <p style="margin: 4px 0 0 0; color: #666;">
+            Забрати до:
+            <strong>
+              {{ booking.pickup_deadline.strftime('%Y-%m-%d %H:%M:%S') if booking.pickup_deadline else '' }}
+            </strong>
+          </p>
+          {% endif %}
+        </div>
+
+        <div style="text-align: right;">
+          <div style="margin-bottom: 8px;">
+            {% if booking.status == 'active' %}
+              <span style="background: #dbeafe; color: #1e40af; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;">Активне</span>
+            {% elif booking.status == 'collected' %}
+              <span style="background: #dcfce7; color: #166534; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;">Отримано</span>
+            {% elif booking.status == 'expired' %}
+              <span style="background: #fee2e2; color: #991b1b; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;">Закінчилось</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap;">
+        {% if booking.status != 'received' %}
+        <a href="/download_booking/{{ booking.booking_id }}" class="btn" style="flex: 1; text-align: center; min-width: 120px;">Чек</a>
+        {% endif %}
+
+        {% if booking.can_cancel %}
+        <form method="post" action="/bookings/delete/{{ booking.booking_id }}" style="flex: 1; min-width: 120px;">
+          <button type="submit" class="btn" style="width: 100%; background: #ef4444; color: white;" onclick="return confirm('Ви впевнені?')">Скасувати</button>
+        </form>
+        {% endif %}
+
+        {% if booking.status == 'active' and not booking.can_cancel %}
+        <form method="post" action="/bookings/confirm/{{ booking.booking_id }}" style="flex: 1; min-width: 120px;">
+          <button type="submit" class="btn primary" style="width: 100%;">Отримано</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<script>
+  (function(){
+    async function poll(){
+      try{ const res = await fetch('/bookings/poll'); const data = await res.json(); }catch(e){}
+    }
+    poll(); setInterval(poll, 20000);
+  })();
+</script>
+{% endblock %}

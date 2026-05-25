@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+  <h2>Управління бронюваннями</h2>
+  
+  <div style="margin-bottom: 1.5rem;">
+    <a href="{{ url_for('admin_dashboard.admin_dashboard') }}" class="btn">←</a>
+  </div>
+
+  <!-- ФІЛЬТРИ -->
+  <div style="background:#f9fafb;padding:15px;border-radius:8px;margin-bottom:20px;border:2px solid #16a34a;box-shadow:0 2px 8px rgba(22,163,74,0.1);">
+    <form method="get" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;">
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#666;">Пошук (ім'я, email, лік):</label>
+        <input type="text" name="search" value="{{ search }}" placeholder="Введіть текст..." style="width:100%;padding:8px;border:1px solid #16a34a;border-radius:4px;font-size:13px;">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#666;">Статус:</label>
+        <select name="status" style="width:100%;padding:8px;border:1px solid #16a34a;border-radius:4px;font-size:13px;">
+          <option value="">-- Усі --</option>
+          <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Активне</option>
+          <option value="collected" {% if status_filter == 'collected' %}selected{% endif %}>Отримано</option>
+          <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Закінчилось</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:500;color:#666;">Сортування:</label>
+        <select name="sort" style="width:100%;padding:8px;border:1px solid #16a34a;border-radius:4px;font-size:13px;">
+          <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Новіші</option>
+          <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Старіші</option>
+          <option value="medicine" {% if sort == 'medicine' %}selected{% endif %}>За назвою препарату</option>
+          <option value="user" {% if sort == 'user' %}selected{% endif %}>За ім'ям користувача</option>
+        </select>
+      </div>
+      <button type="submit" class="btn" style="background:#16a34a;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-size:13px;">Пошук</button>
+    </form>
+  </div>
+
+  <div style="background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <div id="bookings-table-container">
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead style="background: #f3f4f6;">
+        <tr>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">ID</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">КЛІЄНТ</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">ЛІК</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">АПТЕКА</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">ДАТА</th>
+          <th style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">СТАТУС</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+          <td style="padding: 12px;"><strong>#{{ booking.booking_id }}</strong></td>
+          <td style="padding: 12px;">{{ booking.full_name }}</td>
+          <td style="padding: 12px;">{{ booking.medicine_name }}</td>
+          <td style="padding: 12px;">{{ booking.pharmacy_name }}</td>
+          <td style="padding: 12px; font-size: 13px;">{{ booking.booking_date.strftime('%Y-%m-%d %H:%M') if booking.booking_date else '' }}</td>
+          <td style="padding: 12px; text-align: center;">
+            <form method="post" action="{{ url_for('admin_dashboard.admin_booking_update_status', booking_id=booking.booking_id) }}">
+              <select name="status" onchange="this.form.submit()" style="padding:6px;border-radius:6px;border:1px solid #e5e7eb;font-size:13px;">
+                <option value="active" {% if booking.status == 'active' %}selected{% endif %}>Активне</option>
+                <option value="collected" {% if booking.status == 'collected' %}selected{% endif %}>Отримано</option>
+                <option value="expired" {% if booking.status == 'expired' %}selected{% endif %}>Закінчилось</option>
+                <option value="cancelled" {% if booking.status == 'cancelled' %}selected{% endif %}>Скасовано</option>
+              </select>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[method="get"]');
+    const searchInput = document.querySelector('input[name="search"]');
+    const tableContainer = document.getElementById('bookings-table-container');
+    let debounceTimer = null;
+
+    async function doSearch(){
+        const params = new URLSearchParams(new FormData(form));
+        const url = '/admin/bookings/search?' + params.toString();
+        try{
+            const res = await fetch(url, { headers: { 'Accept': 'text/html' } });
+            if(res.ok){
+                const html = await res.text();
+                if(tableContainer) tableContainer.innerHTML = html;
+            }
+        }catch(e){ console.warn(e); }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', doSearch);
+    }
+    
+    form && form.addEventListener('change', function(e){ 
+        if(e.target.name === 'search') return; 
+        doSearch(); 
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <h1 style="margin:0;">Управління ліками</h1>
+    <div style="display:flex;gap:12px;">
+      <a href="{{ url_for('admin_categories.admin_categories') }}" class="btn" style="background:#3b82f6;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;border:none;cursor:pointer;"> Категорії</a>
+      <a href="{{ url_for('admin_manufacturers.admin_manufacturers') }}" class="btn" style="background:#f59e0b;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;border:none;cursor:pointer;"> Виробники</a>
+      <a href="{{ url_for('admin_medicines.admin_medicines_add') }}" class="btn" style="background:#16a34a;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;border:none;cursor:pointer;">+ Додати препарат</a>
+      <a href="{{ url_for('admin_dashboard.admin_dashboard') }}" class="btn" style="background:#e5e7eb;color:#333;padding:10px 20px;border-radius:6px;text-decoration:none;border:none;cursor:pointer;">←</a>
+    </div>
+</div>
+
+<!-- ФІЛЬТРИ -->
+<div style="background:#f9fafb;padding:15px;border-radius:8px;margin-bottom:20px;border:2px solid #16a34a;box-shadow:0 2px 8px rgba(22,163,74,0.1);">
+  <form method="get" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;">
+    <div>
+      <label style="font-size:12px;font-weight:500;color:#666;">Пошук:</label>
+      <input type="text" name="search" value="{{ search }}" placeholder="Назва, виробник, діюча речовина..." style="width:100%;padding:8px;border:1px solid #16a34a;border-radius:4px;font-size:13px;">
+    </div>
+    <div>
+      <label style="font-size:12px;font-weight:500;color:#666;">Категорія:</label>
+      <select name="category" style="width:100%;padding:8px;border:1px solid #16a34a;border-radius:4px;font-size:13px;">
+        <option value="">-- Усі --</option>
+        {% for cat in categories %}
+          <option value="{{ cat.category_id }}" {% if category_filter|string == cat.category_id|string %}selected{% endif %}>{{ cat.category_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label style="font-size:12px;font-weight:500;color:#666;">Виробник:</label>
+      <select name="manufacturer" style="width:100%;padding:8px;border:1px solid #16a34a;border-radius:4px;font-size:13px;">
+        <option value="">-- Усі --</option>
+        {% for mf in manufacturers %}
+          <option value="{{ mf.manufacturer_id }}" {% if manufacturer_filter|string == mf.manufacturer_id|string %}selected{% endif %}>{{ mf.manufacturer_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label style="font-size:12px;font-weight:500;color:#666;">Сортування:</label>
+      <select name="sort" style="width:100%;padding:8px;border:1px solid #16a34a;border-radius:4px;font-size:13px;">
+        <option value="name" {% if sort == 'name' %}selected{% endif %}>За назвою (А-Я)</option>
+        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Ціна (↑)</option>
+        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Ціна (↓)</option>
+        <option value="date_new" {% if sort == 'date_new' %}selected{% endif %}>Новіші</option>
+        <option value="date_old" {% if sort == 'date_old' %}selected{% endif %}>Старіші</option>
+      </select>
+    </div>
+    <button type="submit" class="btn" style="background:#16a34a;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-size:13px;">Пошук</button>
+  </form>
+</div>
+
+<div class="admin-container">
+    <h3>Список ліків</h3>
+    <div id="medicines-table-container">
+    {% include 'admin/partials/medicines_table.html' %}
+    </div>
+</div>
+
+<style>
+.admin-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.form-card { background: #f5f5f5; padding: 20px; border-radius: 8px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+.form-row input, .form-row select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; }
+.form-row input:focus, .form-row select:focus, textarea:focus { outline: none; border-color: #16a34a; }
+.btn-primary { background: #16a34a; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+.btn-primary:hover { background: #159940; }
+.btn-edit { background: #3b82f6; color: white; padding: 6px 12px; border: none; cursor: pointer; border-radius: 4px; text-decoration: none; display: inline-block; margin-right: 4px; font-size: 12px; }
+.btn-edit:hover { background: #2563eb; }
+.btn-delete { background: #ef4444; color: white; padding: 6px 12px; border: none; cursor: pointer; border-radius: 4px; font-size: 12px; }
+.btn-delete:hover { background: #dc2626; }
+.admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.admin-table thead { background: #16a34a; color: white; }
+.admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+.admin-table tbody tr:hover { background: #f9f9f9; }
+.btn-edit,
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    line-height: 1;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[method="get"]');
+    const searchInput = document.querySelector('input[name="search"]');
+    const tableContainer = document.getElementById('medicines-table-container');
+    let debounceTimer = null;
+
+    async function doSearch(){
+        const params = new URLSearchParams(new FormData(form));
+        const url = '/admin/medicines/search?' + params.toString();
+        try{
+            const res = await fetch(url, { headers: { 'Accept': 'text/html' } });
+            if(res.ok){
+                const html = await res.text();
+                if(tableContainer) tableContainer.innerHTML = html;
+            }
+        }catch(e){ console.warn(e); }
+    }
+
+    if (searchInput) {
+        // фільтрація по кожній букві
+        searchInput.addEventListener('input', doSearch);
+    }
+    
+    // Інші фільтри також змінюють в реал-часі
+    form && form.addEventListener('change', function(e){ 
+        if(e.target.name === 'search') return; 
+        doSearch(); 
+    });
+});
+</script>
+{% endblock %}

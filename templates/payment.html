@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 2rem;">
+  <h2>Оплата замовлення</h2>
+
+  <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    {% if pending %}
+      <p>Сума до оплати: <strong>{{ "%.2f"|format(total) }} грн</strong></p>
+      <p style="color: #666; font-size: 14px;">Замовлення буде створено після успішної оплати</p>
+    {% else %}
+      <p>Замовлення №{{ order_id }}</p>
+      <p>Сума до оплати: <strong>{{ "%.2f"|format(total) }} грн</strong></p>
+    {% endif %}
+
+    <form method="post" id="payment-form">
+
+      <div class="form-group">
+        <label for="card_number">Номер карти:</label>
+        <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" required maxlength="19">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="expiry_date">Термін дії (MM/YY):</label>
+          <input type="text" id="expiry_date" name="expiry_date" placeholder="12/25" required maxlength="5" pattern="(0[1-9]|1[0-2])\/\d{2}">
+        </div>
+        <div class="form-group">
+          <label for="cvv">CVV:</label>
+          <input type="text" id="cvv" name="cvv" placeholder="123" required maxlength="3" pattern="\d{3}">
+        </div>
+      </div>
+
+      <button type="submit" class="btn primary" style="width: 100%;">Оплатити</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Форматування номера карти
+  document.getElementById('card_number').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+    e.target.value = value;
+  });
+
+  // Валідація терміну дії
+  document.getElementById('expiry_date').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length >= 2) {
+      let month = value.slice(0, 2);
+      let year = value.slice(2, 4);
+      
+      //валідація місяця
+      if (parseInt(month) < 1 || parseInt(month) > 12) {
+        e.target.setCustomValidity('Невірний місяць');
+        return;
+      }
+      
+      //валідація року
+      let currentYear = new Date().getFullYear() % 100;
+      if (parseInt(year) < currentYear) {
+        e.target.setCustomValidity('Термін дії минув');
+        return;
+      }
+      
+      e.target.setCustomValidity('');
+      value = month + '/' + year;
+    } else {
+      e.target.setCustomValidity('');
+    }
+    e.target.value = value;
+  });
+
+  // валідація CVV
+  document.getElementById('cvv').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    e.target.value = value;
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,208 @@
+<div class="error-page-wrapper">
+    <div class="error-container-flex">
+        
+        <div class="error-text-side">
+            <h1 class="error-code">404</h1>
+            <h2 class="error-headline"> Ой... я чесно обшукала весь склад  👉 👈</h2>
+            
+            <p class="error-apology">
+                Вибачте, будь ласка... я зазирнула під кожну коробочку з вітамінками, перевірила всі рецептурні шафки й навіть протерла лупу - але сторінки, яку ви просите, <strong>не існує</strong>.
+            </p>
+
+            <div class="medical-diagnosis-card">
+                <h4>Можливий діагноз події:</h4>
+                <ul>
+                    <li>Симптоми гострої друкарської помилки в адресному рядку.</li>
+                    <li>Цю сторінку хтось викупив без рецепта й забрав додому.</li>
+                    <li>Тут попрацювали віруси, а антибіотики ми ще не підключили.</li>
+                </ul>
+            </div>
+
+            <p class="recommendation-text"><strong>Рекомендоване лікування:</strong></p>
+            
+            <div class="error-buttons">
+                <a href="/" class="btn-pharmacy-primary">Прийняти плацебо (На головну)</a>
+                <a href="javascript:history.back()" class="btn-pharmacy-secondary">Повернутися назад</a>
+            </div>
+        </div>
+
+        <div class="error-image-side">
+            <img src="/static/images/pharmacist-404.png" alt="Я шукаю сторінку.." class="anime-pharmacist" />
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Основна обгортка: розтягуємо майже на всю корисну висоту */
+    .error-page-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 90vh; 
+        padding: 40px;
+        font-family: system-ui, -apple-system, sans-serif;
+        color: #1f2937;
+        background: #ffffff;
+    }
+
+    /* Максимальна ширина контейнера збільшена до 1400px */
+    .error-container-flex {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        max-width: 1400px; 
+        gap: 50px;
+        background: transparent;
+        padding: 0;
+    }
+
+    /* Колонки тепер ділять простір порівну 1:1 */
+    .error-text-side {
+        flex: 1;
+        text-align: left;
+    }
+
+    .error-image-side {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Дівчинка стала гігантською (max-width: 650px) */
+    .anime-pharmacist {
+        max-width: 650px; 
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        /* М'яка анімація погойдування */
+        animation: gentle-hover 4s ease-in-out infinite;
+    }
+
+    .error-code {
+        font-size: 7rem; 
+        color: #00A859; 
+        font-weight: 900;
+        margin: 0 0 10px 0;
+        line-height: 1;
+    }
+
+    .error-headline {
+        font-size: 2.4rem; 
+        color: #111827;
+        margin-bottom: 20px;
+        font-weight: 800;
+        line-height: 1.3;
+    }
+
+    .error-apology {
+        font-size: 1.2rem;
+        line-height: 1.7;
+        color: #4b5563;
+        margin-bottom: 25px;
+    }
+
+    /* Блок з діагнозом */
+    .medical-diagnosis-card {
+        background: #f0fdf4; 
+        border-left: 5px solid #00A859;
+        border-radius: 14px;
+        padding: 24px;
+        margin-bottom: 25px;
+    }
+
+    .medical-diagnosis-card h4 {
+        margin: 0 0 12px 0;
+        color: #166534;
+        font-size: 1.3rem;
+    }
+
+    .medical-diagnosis-card ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .medical-diagnosis-card li {
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+        color: #1f2937;
+        line-height: 1.5;
+    }
+
+    .recommendation-text {
+        font-size: 1.15rem;
+        margin-bottom: 20px;
+    }
+
+    /* Кнопки */
+    .error-buttons {
+        display: flex;
+        gap: 20px;
+    }
+
+    .btn-pharmacy-primary {
+        background-color: #00A859;
+        color: white;
+        padding: 16px 32px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.05rem;
+        transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-pharmacy-primary:hover {
+        background-color: #008f4a;
+        transform: translateY(-2px);
+    }
+
+    .btn-pharmacy-secondary {
+        background-color: #e5e7eb;
+        color: #374151;
+        padding: 16px 32px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.05rem;
+        transition: background 0.2s;
+    }
+
+    .btn-pharmacy-secondary:hover {
+        background-color: #d1d5db;
+    }
+
+    /* Анімація */
+    @keyframes gentle-hover {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); } /* Трохи збільшив амплітуду для більшої картинки */
+    }
+
+    /* Адаптивність для планшетів та телефонів */
+    @media (max-width: 1024px) {
+        .error-container-flex {
+            flex-direction: column-reverse; 
+            text-align: center;
+            gap: 40px;
+        }
+        .error-text-side {
+            text-align: center;
+        }
+        .medical-diagnosis-card {
+            text-align: left;
+        }
+        .error-buttons {
+            flex-direction: column;
+            gap: 12px;
+        }
+        .anime-pharmacist {
+            max-width: 400px; 
+        }
+        .error-code {
+            font-size: 5rem;
+        }
+        .error-headline {
+            font-size: 2rem;
+        }
+    }
+</style>

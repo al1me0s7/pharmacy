@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="success-card">
+    <h2>Дякуємо! Замовлення створено</h2>
+    <p>Номер замовлення: <strong>#{{ order.order_id }}</strong></p>
+    <p>Статус: <strong>{{ order.delivery_status }}</strong></p>
+    <p>Дата: <strong>{{ order.order_date.strftime('%d.%m.%Y %H:%M') if order.order_date else '-' }}</strong></p>
+
+    <!-- СПОСІБ ДОСТАВКИ -->
+    {% set delivery_translations = {'home': 'Доставка додому', 'nova_poshta': 'Нова Пошта', 'ukrposhta': 'Укрпошта', 'self_pickup': 'Самовивіз з аптеки', 'address': 'Доставка за адресою'} %}
+    <p>Спосіб доставки: <strong>{{ delivery_translations.get(order.delivery_method, order.delivery_method) }}</strong></p>
+    {% set city_to_show = order.city_name or (pharmacy.city_name if pharmacy and pharmacy.city_name) %}
+    <p>Місто: <strong>{{ city_to_show if city_to_show else '-' }}</strong></p>
+    <p>Адреса доставки: <strong>{{ order.delivery_address }}</strong></p>
+
+    <!-- ІНФОРМАЦІЯ ПРО ОПЛАТУ -->
+    <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #16a34a;">
+      <h4 style="margin-top: 0;">Інформація про оплату</h4>
+      <p>Спосіб оплати: <strong>{{ 'Накладний платіж (при отриманні)' if order.payment_method == 'cash_on_delivery' else 'Оплата карткою' }}</strong></p>
+      {% if order.payment_method == 'card_online' %}
+        <p>Карта: <strong>{{ session.get('last_payment_masked_card', 'N/A') }}</strong></p>
+        <p>Статус: <strong style="color: #16a34a;">Успішно оплачено</strong></p>
+      {% endif %}
+    </div>
+
+    {% if pharmacy %}
+      <p>Аптека: <strong>{{ pharmacy.pharmacy_name }}</strong> — {{ pharmacy.address }}{% if pharmacy.city_name %}, {{ pharmacy.city_name }}{% endif %}</p>
+    {% elif order.comment and 'Аптека' not in order.comment %}
+      <p>Коментар: <strong>{{ order.comment }}</strong></p>
+    {% endif %}
+
+    <h3>Деталі замовлення</h3>
+    <table class="cart-table">
+      <thead><tr><th>Товар</th><th>К-сть</th><th>Сума</th></tr></thead>
+      <tbody>
+        {% for it in items %}
+          <tr><td>{{ it.name }}</td><td>{{ it.quantity }}</td><td>{{ '%.2f'|format(it.subtotal) }} грн</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <p><strong>Всього: {{ '%.2f'|format(order.total_sum) }} грн</strong></p>
+
+    <div style="margin-top:18px; display:flex; gap:12px; justify-content:center;">
+      {% if order.payment_method == 'card_online' %}
+        <a class="btn primary" style="font-size:16px;padding:12px 20px" href="/download/payment_receipt">Завантажити чек</a>
+      {% else %}
+        <a class="btn primary" style="font-size:16px;padding:12px 20px" href="/download_order/{{ order.order_id }}">Завантажити чек</a>
+      {% endif %}
+      <a class="btn" href="/profile">Перейти в мій профіль</a>
+      {% if can_cancel %}
+      <form method="post" action="/orders/delete/{{ order.order_id }}" style="display: inline;">
+        <button type="submit" class="btn" style="background: #ef4444; color: white; font-size:16px;padding:12px 20px" onclick="return confirm('Скасувати замовлення?')">Скасувати</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

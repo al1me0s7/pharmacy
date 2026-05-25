@@ -1,0 +1,19 @@
+def upgrade():
+    return '''
+ALTER TABLE admins
+    DROP COLUMN IF EXISTS full_name,
+    DROP COLUMN IF EXISTS email,
+    DROP COLUMN IF EXISTS phone,
+    DROP COLUMN IF EXISTS created_at,
+    DROP COLUMN IF EXISTS is_active;
+'''
+
+def downgrade():
+    return '''
+ALTER TABLE admins
+    ADD COLUMN IF NOT EXISTS full_name VARCHAR(100),
+    ADD COLUMN IF NOT EXISTS email VARCHAR(100),
+    ADD COLUMN IF NOT EXISTS phone VARCHAR(20),
+    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+'''
