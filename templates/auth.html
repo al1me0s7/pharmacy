@@ -2,47 +2,72 @@
 
 {% block content %}
 <div class="auth-wrapper">
-  
+
   <div class="auth-box {% if show_register %}active{% endif %}" id="authBox">
-    
+
     <div class="form-container sign-up">
       <form method="post" action="/register">
         <h2>Створити акаунт</h2>
+
         <input type="text" name="full_name" placeholder="ПІБ" required>
         <input type="email" name="email" placeholder="Email" required>
         <input type="password" name="password" placeholder="Пароль" required>
         <input type="tel" name="phone" placeholder="Телефон">
         <input type="text" name="city" placeholder="Місто">
         <input type="text" name="address" placeholder="Адреса">
+
         <button type="submit">Зареєструватися</button>
+
+        <div class="mobile-switch">
+          <span>Вже є акаунт?</span>
+          <button type="button" class="mobile-link-btn" id="mobileLoginBtn">
+            Увійти
+          </button>
+        </div>
+
+        <a href="/admin/login" class="mobile-admin-link">
+          Я адмін
+        </a>
       </form>
     </div>
 
     <div class="form-container sign-in">
       <form method="post" action="/login">
         <h2>Вхід</h2>
+
         <input type="email" name="email" placeholder="Email" required>
         <input type="password" name="password" placeholder="Пароль" required>
-        <a href="/admin/login" class="admin-link" style="display:block;margin:8px 0;color:#16a34a;font-size:12px;">Я адмін</a>
+
+        <a href="/admin/login" class="admin-link">
+          Я адмін
+        </a>
+
         <button type="submit">Увійти</button>
+
+        <div class="mobile-switch">
+          <span>Немає акаунта?</span>
+          <button type="button" class="mobile-link-btn" id="mobileRegisterBtn">
+            Зареєструватися
+          </button>
+        </div>
       </form>
     </div>
 
     <div class="toggle-container">
       <div class="toggle">
-        
+
         <div class="toggle-panel toggle-left">
           <h1>Вітаємо!</h1>
           <p>Вже є аккаунт?</p>
           <button class="ghost" id="loginBtn">Вхід</button>
         </div>
-        
+
         <div class="toggle-panel toggle-right">
           <h1>Вітаємо!</h1>
           <p>Зареєструйтесь, якщо ще не маєте аккаунту</p>
           <button class="ghost" id="registerBtn">Реєстрація</button>
         </div>
-        
+
       </div>
     </div>
   </div>
@@ -60,10 +85,10 @@
     align-items: center;
     justify-content: center;
     padding: 40px 20px;
-    min-height: 85vh; 
+    min-height: 85vh;
     width: 100%;
     box-sizing: border-box;
-    margin-top: 0; 
+    margin-top: 0;
   }
 
   .auth-box {
@@ -75,7 +100,7 @@
     width: 850px;
     max-width: 100%;
     min-height: 600px;
-    z-index: 1; 
+    z-index: 1;
   }
 
   .auth-box p {
@@ -201,7 +226,7 @@
     overflow: hidden;
     transition: all 0.6s ease-in-out;
     border-radius: 150px 0 0 100px;
-    z-index: 10; 
+    z-index: 10;
   }
 
   .auth-box.active .toggle-container {
@@ -249,130 +274,165 @@
   .toggle-right { right: 0; transform: translateX(0); }
   .auth-box.active .toggle-right { transform: translateX(200%); }
 
-  .auth-box h2 { color: #1e3b2a; margin-bottom: 10px; }
-  .auth-box h1 { color: #fff; margin-bottom: 10px; font-size: 28px; line-height: 1.2; }
+  .auth-box h2 {
+    color: #1e3b2a;
+    margin-bottom: 10px;
+  }
+
+  .auth-box h1 {
+    color: #fff;
+    margin-bottom: 10px;
+    font-size: 28px;
+    line-height: 1.2;
+  }
+
+  .mobile-switch,
+  .mobile-admin-link {
+    display: none;
+  }
+
+  .admin-link {
+    display:block;
+    margin:8px 0;
+    color:#16a34a;
+    font-size:12px;
+  }
 
   @media (max-width: 768px) {
-  .auth-wrapper {
-    padding: 16px;
-    min-height: unset;
-    align-items: flex-start;
+
+    .toggle-container {
+      display: none !important;
+    }
+
+    .auth-wrapper {
+      padding: 20px 14px;
+      min-height: auto;
+      align-items: flex-start;
+    }
+
+    .auth-box {
+      width: 100%;
+      min-height: auto;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .form-container {
+      position: relative !important;
+      width: 100% !important;
+      height: auto !important;
+      top: 0 !important;
+      left: 0 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+
+    .sign-in,
+    .sign-up {
+      display: none;
+      opacity: 1 !important;
+      z-index: 1 !important;
+    }
+
+    .auth-box:not(.active) .sign-in {
+      display: block;
+    }
+
+    .auth-box.active .sign-up {
+      display: block;
+    }
+
+    .auth-box form {
+      padding: 28px 20px;
+      justify-content: flex-start;
+      height: auto;
+    }
+
+    .auth-box h2 {
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+
+    .auth-box input {
+      font-size: 15px;
+      padding: 13px 14px;
+      margin: 7px 0;
+      border-radius: 10px;
+    }
+
+    .auth-box button[type="submit"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 14px;
+      margin-top: 14px;
+      border-radius: 10px;
+    }
+
+    .admin-link {
+      display: none !important;
+    }
+
+    .mobile-switch {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .mobile-switch span {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .mobile-link-btn {
+      background: transparent !important;
+      color: #16a34a !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      font-size: 14px !important;
+      text-transform: none !important;
+    }
+
+    .mobile-admin-link {
+      display: inline-block;
+      margin-top: 14px !important;
+      font-size: 13px !important;
+      color: #16a34a !important;
+    }
   }
-
-  .auth-box {
-    width: 100%;
-    border-radius: 16px;
-    min-height: 520px;
-  }
-
-  .sign-in, .sign-up {
-    width: 100% !important;
-    left: 0 !important;
-  }
-
-  .toggle-container {
-    position: static !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 70px !important;
-    border-radius: 16px 16px 0 0 !important;
-    overflow: hidden !important;
-  }
-
-  .auth-box.active .toggle-container {
-    transform: none !important;
-    border-radius: 16px 16px 0 0 !important;
-  }
-
-  .toggle {
-    left: 0 !important;
-    width: 100% !important;
-    height: 70px !important;
-    display: flex !important;
-    transform: translateX(0) !important;
-  }
-
-  .auth-box.active .toggle {
-    transform: translateX(-50%) !important;
-  }
-
-  .toggle-panel {
-    width: 50% !important;
-    height: 70px !important;
-    padding: 0 10px !important;
-    flex-direction: row !important;
-    gap: 10px;
-  }
-
-  .toggle-panel h1 { display: none; }
-  .toggle-panel p { margin: 0 !important; font-size: 13px !important; }
-
-  .toggle-panel button.ghost {
-    padding: 8px 16px !important;
-    margin: 0 !important;
-    font-size: 12px !important;
-    white-space: nowrap;
-  }
-
-  .toggle-left { transform: translateX(0) !important; }
-  .auth-box.active .toggle-left { transform: translateX(0) !important; }
-  .toggle-right { transform: translateX(0) !important; }
-  .auth-box.active .toggle-right { transform: translateX(0) !important; }
-
-  .form-container {
-    top: 70px !important;
-    height: calc(100% - 70px) !important;
-  }
-
-  .auth-box.active .sign-in {
-    transform: translateX(100%) !important;
-  }
-
-  .auth-box.active .sign-up {
-    transform: translateX(100%) !important;
-    opacity: 1 !important;
-    z-index: 5 !important;
-  }
-
-  .auth-box form {
-    padding: 20px 24px !important;
-    height: 100% !important;
-    justify-content: flex-start !important;
-    padding-top: 30px !important;
-  }
-
-  .auth-box input {
-    margin: 6px 0 !important;
-    font-size: 15px !important;
-    padding: 12px 15px !important;
-  }
-
-  .auth-box button[type="submit"] {
-    width: 100% !important;
-    padding: 12px !important;
-    font-size: 14px !important;
-  }
-
-  .auth-box h2 {
-    font-size: 22px !important;
-    margin-bottom: 16px !important;
-  }
-}
 </style>
 
 <script>
   const authBox = document.getElementById('authBox');
+
   const registerBtn = document.getElementById('registerBtn');
   const loginBtn = document.getElementById('loginBtn');
 
-  if(registerBtn && loginBtn && authBox){
-      registerBtn.addEventListener('click', () => {
-        authBox.classList.add('active');
-      });
+  const mobileRegisterBtn = document.getElementById('mobileRegisterBtn');
+  const mobileLoginBtn = document.getElementById('mobileLoginBtn');
 
-      loginBtn.addEventListener('click', () => {
-        authBox.classList.remove('active');
-      });
+  if (registerBtn && loginBtn && authBox) {
+    registerBtn.addEventListener('click', () => {
+      authBox.classList.add('active');
+    });
+
+    loginBtn.addEventListener('click', () => {
+      authBox.classList.remove('active');
+    });
+  }
+
+  if (mobileRegisterBtn && mobileLoginBtn && authBox) {
+    mobileRegisterBtn.addEventListener('click', () => {
+      authBox.classList.add('active');
+    });
+
+    mobileLoginBtn.addEventListener('click', () => {
+      authBox.classList.remove('active');
+    });
   }
 </script>
 
