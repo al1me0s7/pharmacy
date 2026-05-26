@@ -48,7 +48,6 @@
 
 <form id="filter-form" method="get" action="/">
 
-  <!-- ========== МОБІЛЬНА ПАНЕЛЬ ФІЛЬТРІВ (тільки на телефоні) ========== -->
   <div class="filters-mobile-bar">
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;border:2px solid #16a34a;border-radius:10px;padding:10px;">
       <select id="city-select-mob" name="city_id" style="flex:1;min-width:110px;padding:8px;border-radius:6px;border:1px solid #16a34a;font-size:14px;color:#16a34a;font-weight:600;background:white;">
@@ -95,7 +94,6 @@
     </div>
   </div>
 
-  <!-- ========== ДЕСКТОП: сайдбар + результати ========== -->
   <div class="catalog-grid-desktop">
     <aside style="position:sticky;top:20px;height:fit-content;max-height:calc(100vh - 40px);overflow-y:auto;border:2px solid #16a34a;border-radius:8px;padding:16px;background:white;box-shadow:0 2px 8px rgba(22,163,74,0.1);">
       <div style="display:flex;flex-direction:column;gap:12px;">
@@ -133,9 +131,9 @@
         </div>
         <div style="border-bottom:2px solid #16a34a;padding:10px 0;">
           <label style="font-weight:bold;color:#16a34a;display:block;margin-bottom:8px;font-size:15px;">Ціна (грн)</label>
-          <div style="display:flex;gap:8px;">
-            <input type="number" name="min_price" placeholder="від" value="{{ min_price }}" style="flex:1;padding:8px;border-radius:5px;border:1px solid #16a34a;font-size:14px;">
-            <input type="number" name="max_price" placeholder="до" value="{{ max_price }}" style="flex:1;padding:8px;border-radius:5px;border:1px solid #16a34a;font-size:14px;">
+          <div style="display:flex;gap:6px;width:100%;box-sizing:border-box;">
+            <input type="number" name="min_price" placeholder="від" value="{{ min_price }}" style="width:0;flex:1;min-width:0;padding:8px 6px;border-radius:5px;border:1px solid #16a34a;font-size:14px;box-sizing:border-box;">
+            <input type="number" name="max_price" placeholder="до" value="{{ max_price }}" style="width:0;flex:1;min-width:0;padding:8px 6px;border-radius:5px;border:1px solid #16a34a;font-size:14px;box-sizing:border-box;">
           </div>
         </div>
         <select name="sort" style="padding:10px;border-radius:5px;border:1px solid #16a34a;font-weight:bold;color:#16a34a;background:white;cursor:pointer;">
@@ -146,7 +144,6 @@
       </div>
     </aside>
 
-    <!-- Результати тільки на десктопі всередині grid -->
     <main class="results results-desktop" style="position:relative;z-index:1;">
       <section class="grid">
         {% for m in meds %}
@@ -194,7 +191,6 @@
     </main>
   </div>
 
-  <!-- ========== РЕЗУЛЬТАТИ НА МОБІЛЬНОМУ (окремо, поза grid) ========== -->
   <main class="results results-mobile" style="margin-top:12px;">
     <section class="grid grid-mobile">
       {% for m in meds %}
@@ -281,7 +277,6 @@
 document.addEventListener('DOMContentLoaded', function () {
   const form = document.getElementById('filter-form');
 
-  // Всі grid-и з результатами (десктоп + мобільний)
   const gridsDesktop = document.querySelector('.results-desktop .grid');
   const gridsMobile = document.querySelector('.results-mobile .grid-mobile');
 
@@ -302,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (e) { console.warn(e); }
   }
 
-  // Синхронізація мобільних інпутів з десктопними (вони в одній формі, але name однакові — беремо перший)
+  // Синхронізація мобільних інпутів з десктопними
   const qMob = document.getElementById('q-input-mob');
   const qDesk = document.getElementById('q-input');
   if (qMob) qMob.addEventListener('input', function(){ if(qDesk) qDesk.value=this.value; doSearch(); });
@@ -316,7 +311,6 @@ document.addEventListener('DOMContentLoaded', function () {
     e.preventDefault(); doSearch();
   });
 
-  // Кнопка "Ще" на мобільному
   const toggleMore = document.getElementById('toggle-more-mob');
   const moreFilters = document.getElementById('more-filters-mob');
   if (toggleMore && moreFilters) {
@@ -327,7 +321,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Десктоп: розгортання категорій/виробників
   ['toggle-categories', 'toggle-manufacturers'].forEach(function(id) {
     const btn = document.getElementById(id);
     const contentId = id === 'toggle-categories' ? 'categories-content' : 'manufacturers-content';
