@@ -299,7 +299,6 @@ def bookings_poll():
 # CRUD: Завантажити - завантаження PDF чека бронювання
 @bp.route('/download_booking/<int:bid>')
 def download_booking(bid):
-    from app.utils.helpers import get_current_user
     user = get_current_user()
     if not user:
         return 'Unauthorized', 401
@@ -307,26 +306,32 @@ def download_booking(bid):
     booking = Booking.get_by_id(bid)
     if not booking or booking['user_id'] != user['user_id']:
         return 'Not Found', 404
- 
+
     if booking['status'] == 'expired':
         return 'Forbidden - booking expired', 403
     
     user_obj = User.find_by_id(booking['user_id'])
-    pharmacy = Pharmacy.get_by_id(booking['pharmacy_id'])
-    city = City.get_by_id(pharmacy['city_id']) if pharmacy else None
+    pharmacy = Pharmacy.get_by_id(booking['pharmacy_id']) if booking.get('pharmacy_id') else None
     
-    # Якщо бронювання з множественими ліками
-    if booking.get('items'):
-        try:
+    # Якщо аптека не знайдена — підставити заглушку
+    if not pharmacy:
+        pharmacy = {'pharmacy_name': 'Невідома аптека', 'address': 'N/A', 'city_id': None, 'phone': 'N/A'}
+    
+    city = City.get_by_id(pharmacy['city_id']) if pharmacy.get('city_id') else None
+    if not city:
+        city = {'city_name': 'N/A'}
+
+    try:
+        if booking.get('items'):
             items_data = json.loads(booking.get('items', '[]'))
             pdf_buffer = generate_multi_booking_pdf(booking, user_obj, items_data, pharmacy, city)
-        except:
-            medicine = Medicine.get_by_id(booking['medicine_id'])
+        else:
+            medicine = Medicine.get_by_id(booking['medicine_id']) if booking.get('medicine_id') else None
+            if not medicine:
+                medicine = {'name': 'Невідомий препарат', 'price': 0}
             pdf_buffer = generate_booking_pdf(booking, user_obj, medicine, pharmacy, city)
-    else:
-        # якщо бронювання з одним ліком
-        medicine = Medicine.get_by_id(booking['medicine_id'])
-        pdf_buffer = generate_booking_pdf(booking, user_obj, medicine, pharmacy, city)
+    except Exception as e:
+        return f'Помилка генерації PDF: {str(e)}', 500
     
     return send_file(
         pdf_buffer,
