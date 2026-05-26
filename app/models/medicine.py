@@ -3,7 +3,11 @@ from app.models.database import Database
 class Medicine:
     @staticmethod
     def search(query=None, category=None, manufacturer=None, prescription=None, sort='name', city=None):
-        base_sql = '''SELECT m.*, c.category_name, mf.manufacturer_name, 
+        base_sql = '''SELECT m.medicine_id, m.manufacturer_id, m.category_id, m.name, m.description,
+                             m.active_substance, m.dosage_form, m.dosage_value, m.price, m.quantity_in_stock,
+                             m.expiration_date, m.prescription_required, m.contraindications,
+                             m.storage_conditions, m.date_added, m.image, m.composition, m.usage_instructions,
+                             c.category_name, mf.manufacturer_name,
                              COALESCE(AVG(r.rating), 0) as avg_rating,
                              COUNT(r.review_id) as review_count
                       FROM medicines m 
@@ -38,28 +42,14 @@ class Medicine:
             base_sql += ' WHERE ' + ' AND '.join(where)
 
         base_sql += '''
-GROUP BY 
-    m.medicine_id,
-    m.manufacturer_id,
-    m.category_id,
-    m.name,
-    m.description,
-    m.active_substance,
-    m.dosage_form,
-    m.dosage_value,
-    m.price,
-    m.quantity_in_stock,
-    m.expiration_date,
-    m.prescription_required,
-    m.contraindications,
-    m.storage_conditions,
-    m.date_added,
-    m.image,
-    m.composition,
-    m.usage_instructions,
-    c.category_name,
-    mf.manufacturer_name
-'''
+            GROUP BY
+                m.medicine_id, m.manufacturer_id, m.category_id, m.name, m.description,
+                m.active_substance, m.dosage_form, m.dosage_value, m.price, m.quantity_in_stock,
+                m.expiration_date, m.prescription_required, m.contraindications,
+                m.storage_conditions, m.date_added, m.image, m.composition, m.usage_instructions,
+                c.category_name, mf.manufacturer_name
+        '''
+
         if sort == 'price_asc':
             base_sql += ' ORDER BY m.price ASC'
         elif sort == 'price_desc':
@@ -74,11 +64,19 @@ GROUP BY
     @staticmethod
     def get_by_id(medicine_id):
         return Database.fetchone(
-            '''SELECT m.*, COALESCE(AVG(r.rating),0) as avg_rating, COUNT(r.review_id) as review_count
+            '''SELECT m.medicine_id, m.manufacturer_id, m.category_id, m.name, m.description,
+                      m.active_substance, m.dosage_form, m.dosage_value, m.price, m.quantity_in_stock,
+                      m.expiration_date, m.prescription_required, m.contraindications,
+                      m.storage_conditions, m.date_added, m.image, m.composition, m.usage_instructions,
+                      COALESCE(AVG(r.rating),0) as avg_rating, COUNT(r.review_id) as review_count
                FROM medicines m
                LEFT JOIN reviews r ON m.medicine_id=r.medicine_id
                WHERE m.medicine_id=%s
-               GROUP BY m.medicine_id''',
+               GROUP BY
+                   m.medicine_id, m.manufacturer_id, m.category_id, m.name, m.description,
+                   m.active_substance, m.dosage_form, m.dosage_value, m.price, m.quantity_in_stock,
+                   m.expiration_date, m.prescription_required, m.contraindications,
+                   m.storage_conditions, m.date_added, m.image, m.composition, m.usage_instructions''',
             (medicine_id,)
         )
 
