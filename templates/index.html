@@ -54,166 +54,253 @@
 </div>
 {% endif %}
 
-<div class="catalog-grid" style="display:grid;grid-template-columns:280px 1fr;gap:20px;margin-bottom:40px;">
-  <aside class="form-card filters"
-    style="position:sticky;top:20px;height:fit-content;max-height:calc(100vh - 40px);overflow-y:auto;border:2px solid #16a34a;border-radius:8px;padding:16px;background:white;box-shadow:0 2px 8px rgba(22,163,74,0.1);">
-    <form id="filter-form" method="get" action="/">
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <!-- ВИБІР МІСТА -->
-        <div style="border-bottom:2px solid #16a34a;padding-bottom:10px;">
-          <label style="font-weight:bold;color:#16a34a;display:block;margin-bottom:8px;font-size:15px;">Місто</label>
-          <select id="city-select" name="city_id"
-            style="width:100%;padding:10px;border-radius:5px;border:1px solid #16a34a;font-weight:bold;color:#16a34a;background:white;cursor:pointer;">
-            <option value="">Не обрано</option>
-            {% if cities %}
-            {% for city in cities %}
-            <option value="{{ city.city_id }}" {% if city_id and city_id|int==city.city_id %}selected{% endif %}>{{
-              city.city_name }}</option>
-            {% endfor %}
-            {% endif %}
+<!-- ФІЛЬТРИ (горизонтальна панель на мобільному) -->
+<div id="filters-panel" style="margin-bottom:20px;">
+  <form id="filter-form" method="get" action="/">
+    <!-- Мобільна панель фільтрів -->
+    <div class="filters-mobile-bar" style="display:none;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;border:2px solid #16a34a;border-radius:10px;padding:10px;">
+        <select id="city-select" name="city_id" style="flex:1;min-width:120px;padding:8px;border-radius:6px;border:1px solid #16a34a;font-size:14px;color:#16a34a;font-weight:600;">
+          <option value="">Місто</option>
+          {% if cities %}{% for city in cities %}
+          <option value="{{ city.city_id }}" {% if city_id and city_id|int==city.city_id %}selected{% endif %}>{{ city.city_name }}</option>
+          {% endfor %}{% endif %}
+        </select>
+        <input id="q-input" name="q" placeholder="Пошук..." value="{{ q }}" style="flex:2;min-width:150px;padding:8px;border-radius:6px;border:1px solid #e6e9ef;font-size:14px;">
+        <select name="sort" style="flex:1;min-width:120px;padding:8px;border-radius:6px;border:1px solid #16a34a;font-size:14px;color:#16a34a;font-weight:600;">
+          <option value="name" {% if sort=='name' %}selected{% endif %}>Назва</option>
+          <option value="price_asc" {% if sort=='price_asc' %}selected{% endif %}>Дешевше</option>
+          <option value="price_desc" {% if sort=='price_desc' %}selected{% endif %}>Дорожче</option>
+        </select>
+        <button type="button" id="toggle-more-filters" style="padding:8px 12px;background:#16a34a;color:white;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:600;">Ще ▼</button>
+      </div>
+      <!-- Розгорнуті фільтри на мобільному -->
+      <div id="more-filters-mobile" style="display:none;background:#fff;border:2px solid #16a34a;border-top:none;border-radius:0 0 10px 10px;padding:12px;">
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="number" name="min_price" placeholder="Ціна від" value="{{ min_price }}" style="flex:1;padding:8px;border-radius:6px;border:1px solid #16a34a;font-size:14px;">
+          <input type="number" name="max_price" placeholder="до" value="{{ max_price }}" style="flex:1;padding:8px;border-radius:6px;border:1px solid #16a34a;font-size:14px;">
+        </div>
+        <details style="margin-bottom:8px;">
+          <summary style="font-weight:600;color:#16a34a;cursor:pointer;padding:4px 0;">Категорії</summary>
+          <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+            {% if categories %}{% for c in categories %}
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+              <input type="checkbox" name="categories" value="{{ c.category_id|string }}" class="filter-checkbox" {% if c.category_id|string in categories_list %}checked{% endif %} style="accent-color:#16a34a;">
+              {{ c.category_name }}
+            </label>
+            {% endfor %}{% endif %}
+          </div>
+        </details>
+        <details>
+          <summary style="font-weight:600;color:#16a34a;cursor:pointer;padding:4px 0;">Виробники</summary>
+          <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+            {% if manufacturers %}{% for mf in manufacturers %}
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+              <input type="checkbox" name="manufacturers" value="{{ mf.manufacturer_id|string }}" class="filter-checkbox" {% if mf.manufacturer_id|string in manufacturers_list %}checked{% endif %} style="accent-color:#16a34a;">
+              {{ mf.manufacturer_name }}
+            </label>
+            {% endfor %}{% endif %}
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- Десктопний layout (оригінальний) -->
+    <div class="catalog-grid-desktop" style="display:grid;grid-template-columns:280px 1fr;gap:20px;margin-bottom:40px;">
+      <aside style="position:sticky;top:20px;height:fit-content;max-height:calc(100vh - 40px);overflow-y:auto;border:2px solid #16a34a;border-radius:8px;padding:16px;background:white;box-shadow:0 2px 8px rgba(22,163,74,0.1);">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="border-bottom:2px solid #16a34a;padding-bottom:10px;">
+            <label style="font-weight:bold;color:#16a34a;display:block;margin-bottom:8px;font-size:15px;">Місто</label>
+            <select id="city-select-desktop" name="city_id" style="width:100%;padding:10px;border-radius:5px;border:1px solid #16a34a;font-weight:bold;color:#16a34a;background:white;cursor:pointer;">
+              <option value="">Не обрано</option>
+              {% if cities %}{% for city in cities %}
+              <option value="{{ city.city_id }}" {% if city_id and city_id|int==city.city_id %}selected{% endif %}>{{ city.city_name }}</option>
+              {% endfor %}{% endif %}
+            </select>
+          </div>
+          <input id="q-input-desktop" name="q" placeholder="Пошук по назві, виробнику, діючій речовині..." value="{{ q }}" style="padding:10px;border-radius:8px;border:1px solid #e6e9ef;font-size:14px;">
+          <div style="border-bottom:2px solid #16a34a;padding:10px 0;">
+            <button id="toggle-categories" style="background:none;border:none;font-weight:bold;color:#16a34a;width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;font-size:15px;cursor:pointer;">Категорії<span>▼</span></button>
+            <div id="categories-content" style="display:none;margin-top:12px;max-height:300px;overflow-y:auto;padding-right:4px;">
+              {% if categories %}{% for c in categories %}
+              <label style="display:flex;align-items:center;margin-bottom:8px;cursor:pointer;padding:6px;border-radius:4px;">
+                <input type="checkbox" name="categories" value="{{ c.category_id|string }}" class="filter-checkbox" {% if c.category_id|string in categories_list %}checked{% endif %} style="width:18px;height:18px;cursor:pointer;accent-color:#16a34a;flex-shrink:0;">
+                <span style="margin-left:8px;font-size:13px;color:#333;">{{ c.category_name }}</span>
+              </label>
+              {% endfor %}{% endif %}
+            </div>
+          </div>
+          <div style="border-bottom:2px solid #16a34a;padding:10px 0;">
+            <button id="toggle-manufacturers" style="background:none;border:none;font-weight:bold;color:#16a34a;width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;font-size:15px;cursor:pointer;">Виробники<span>▼</span></button>
+            <div id="manufacturers-content" style="display:none;margin-top:12px;max-height:300px;overflow-y:auto;padding-right:4px;">
+              {% if manufacturers %}{% for mf in manufacturers %}
+              <label style="display:flex;align-items:center;margin-bottom:8px;cursor:pointer;padding:6px;border-radius:4px;">
+                <input type="checkbox" name="manufacturers" value="{{ mf.manufacturer_id|string }}" class="filter-checkbox" {% if mf.manufacturer_id|string in manufacturers_list %}checked{% endif %} style="width:18px;height:18px;cursor:pointer;accent-color:#16a34a;flex-shrink:0;">
+                <span style="margin-left:8px;font-size:13px;color:#333;">{{ mf.manufacturer_name }}</span>
+              </label>
+              {% endfor %}{% endif %}
+            </div>
+          </div>
+          <div style="border-bottom:2px solid #16a34a;padding:10px 0;">
+            <label style="font-weight:bold;color:#16a34a;display:block;margin-bottom:8px;font-size:15px;">Ціна (грн)</label>
+            <div style="display:flex;gap:8px;">
+              <input type="number" name="min_price" placeholder="від" value="{{ min_price }}" style="flex:1;padding:8px;border-radius:5px;border:1px solid #16a34a;font-size:14px;">
+              <input type="number" name="max_price" placeholder="до" value="{{ max_price }}" style="flex:1;padding:8px;border-radius:5px;border:1px solid #16a34a;font-size:14px;">
+            </div>
+          </div>
+          <select name="sort" style="padding:10px;border-radius:5px;border:1px solid #16a34a;font-weight:bold;color:#16a34a;background:white;cursor:pointer;">
+            <option value="name" {% if sort=='name' %}selected{% endif %}>Сортувати: Назва</option>
+            <option value="price_asc" {% if sort=='price_asc' %}selected{% endif %}>Ціна (дешевше)</option>
+            <option value="price_desc" {% if sort=='price_desc' %}selected{% endif %}>Ціна (дорожче)</option>
           </select>
         </div>
+      </aside>
 
-        <!-- ПОШУК -->
-        <input id="q-input" name="q" placeholder="Пошук по назві, виробнику, діючій речовині..." value="{{ q }}"
-          style="padding:10px;border-radius:8px;border:1px solid #e6e9ef;font-size:14px;">
-
-        <!-- КАТЕГОРІЇ -->
-        <div style="border-bottom:2px solid #16a34a;padding:10px 0;">
-          <button id="toggle-categories" style="
-    background:none;border:none;font-weight:bold;color:#16a34a;width:100%;text-align:left;
-    display:flex;justify-content:space-between;align-items:center;font-size:15px;
-    cursor:pointer;
-  ">
-            Категорії
-            <span>▼</span>
-          </button>
-          <div id="categories-content"
-            style="display:none;margin-top:12px;max-height:300px;overflow-y:auto;padding-right:4px;">
-            {% if categories %}
-            {% for c in categories %}
-            <label
-              style="display:flex;align-items:center;margin-bottom:8px;cursor:pointer;padding:6px;border-radius:4px;transition:background 0.2s;">
-              <input type="checkbox" name="categories" value="{{ c.category_id|string }}" class="filter-checkbox" {% if
-                c.category_id|string in categories_list %}checked{% endif %}
-                style="width:18px;height:18px;cursor:pointer;accent-color:#16a34a;flex-shrink:0;">
-              <span style="margin-left:8px;font-size:13px;color:#333;">{{ c.category_name }}</span>
-            </label>
-            {% endfor %}
-            {% endif %}
-          </div>
-        </div>
-
-        <!-- ВИРОБНИКИ -->
-        <div style="border-bottom:2px solid #16a34a;padding:10px 0;">
-          <button id="toggle-manufacturers" style="
-    background:none;border:none;font-weight:bold;color:#16a34a;width:100%;text-align:left;
-    display:flex;justify-content:space-between;align-items:center;font-size:15px;
-    cursor:pointer;
-  ">
-            Виробники
-            <span>▼</span>
-          </button>
-          <div id="manufacturers-content"
-            style="display:none;margin-top:12px;max-height:300px;overflow-y:auto;padding-right:4px;">
-            {% if manufacturers %}
-            {% for mf in manufacturers %}
-            <label
-              style="display:flex;align-items:center;margin-bottom:8px;cursor:pointer;padding:6px;border-radius:4px;transition:background 0.2s;">
-              <input type="checkbox" name="manufacturers" value="{{ mf.manufacturer_id|string }}"
-                class="filter-checkbox" {% if mf.manufacturer_id|string in manufacturers_list %}checked{% endif %}
-                style="width:18px;height:18px;cursor:pointer;accent-color:#16a34a;flex-shrink:0;">
-              <span style="margin-left:8px;font-size:13px;color:#333;">{{ mf.manufacturer_name }}</span>
-            </label>
-            {% endfor %}
-            {% endif %}
-          </div>
-        </div>
-
-        <!-- ЦІНА -->
-        <div style="border-bottom:2px solid #16a34a;padding:10px 0;">
-          <label style="font-weight:bold;color:#16a34a;display:block;margin-bottom:8px;font-size:15px;">Ціна
-            (грн)</label>
-          <div style="display:flex;gap:8px;">
-            <input type="number" name="min_price" placeholder="від" value="{{ min_price }}"
-              style="flex:1;padding:8px;border-radius:5px;border:1px solid #16a34a;font-size:14px;">
-            <input type="number" name="max_price" placeholder="до" value="{{ max_price }}"
-              style="flex:1;padding:8px;border-radius:5px;border:1px solid #16a34a;font-size:14px;">
-          </div>
-        </div>
-
-        <!-- СОРТУВАННЯ -->
-        <select name="sort"
-          style="padding:10px;border-radius:5px;border:1px solid #16a34a;font-weight:bold;color:#16a34a;background:white;cursor:pointer;">
-          <option value="name" {% if sort=='name' %}selected{% endif %}>Сортувати: Назва</option>
-          <option value="price_asc" {% if sort=='price_asc' %}selected{% endif %}>Ціна (дешевше)</option>
-          <option value="price_desc" {% if sort=='price_desc' %}selected{% endif %}>Ціна (дорожче)</option>
-        </select>
-      </div>
-    </form>
-  </aside>
-
-  <main class="results" style="position:relative;z-index:1;">
-    <section class="grid">
-      {% for m in meds %}
-      <article class="card" data-href="/medicine/{{ m.get('medicine_id') }}" role="button">
-        <div class="card-media">
-          <img alt="{{ m.get('name') or 'Ліки' }}" src="{{ m.get('image') or '/static/images/placeholder.svg' }}"
-            style="background: white; width: 100%; height: auto; object-fit: contain;">
-          {% if m.get('prescription_required') %}<div
-            style="position: absolute; top: 8px; right: 8px; background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-            Рецепт</div>{% endif %}
-        </div>
-        <div class="card-body">
-          <h3 class="card-title">{{ m.get('name') }}</h3>
-          <p class="card-price">{{ m.get('price') }} грн</p>
-          {% if m.get('avg_rating', 0) > 0 %}
-          <div class="card-rating" style="display:flex;align-items:center;gap:4px;margin:4px 0;">
-            {% for i in range(5) %}
-            {% if i < m.get('avg_rating', 0)|round %} <span style="color:#fbbf24;font-size:14px;">★</span>
-              {% else %}
-              <span style="color:#e5e7eb;font-size:14px;">☆</span>
+      <main class="results" style="position:relative;z-index:1;">
+        <section class="grid">
+          {% for m in meds %}
+          <article class="card" data-href="/medicine/{{ m.get('medicine_id') }}" role="button">
+            <div class="card-media">
+              <img alt="{{ m.get('name') or 'Ліки' }}" src="{{ m.get('image') or '/static/images/placeholder.svg' }}" style="background:white;width:100%;height:auto;object-fit:contain;">
+              {% if m.get('prescription_required') %}<div style="position:absolute;top:8px;right:8px;background:#ef4444;color:white;padding:4px 8px;border-radius:4px;font-size:12px;">Рецепт</div>{% endif %}
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">{{ m.get('name') }}</h3>
+              <p class="card-price">{{ m.get('price') }} грн</p>
+              {% if m.get('avg_rating', 0) > 0 %}
+              <div style="display:flex;align-items:center;gap:4px;margin:4px 0;">
+                {% for i in range(5) %}{% if i < m.get('avg_rating', 0)|round %}<span style="color:#fbbf24;font-size:14px;">★</span>{% else %}<span style="color:#e5e7eb;font-size:14px;">☆</span>{% endif %}{% endfor %}
+                <span style="color:#666;font-size:12px;margin-left:4px;">({{ m.get('avg_rating', 0)|round(1) }})</span>
+              </div>
               {% endif %}
-              {% endfor %}
-              <span style="color:#666;font-size:12px;margin-left:4px;">({{ m.get('avg_rating', 0)|round(1) }})</span>
-          </div>
-          {% endif %}
-          <p class="card-desc">{{ (m.get('description') or 'Опис відсутній')[:120] }}{% if m.get('description') and
-            m.get('description')|length > 120 %}...{% endif %}</p>
-          <div style="margin-top:8px;color:var(--muted);font-size:13px">{{ m.get('manufacturer_name') or '' }} — {{
-            m.get('category_name') or '' }}</div>
-        </div>
-        <div class="card-actions" onclick="event.stopPropagation()" style="display:flex;gap:8px;margin-top:8px;">
-          {% if m.get('prescription_required') %}
-          <form method="post" action="/cart/add" style="flex: 1; margin: 0;">
-            <input type="hidden" name="medicine_id" value="{{ m.get('medicine_id') }}">
-            <input type="hidden" name="quantity" value="1">
-            <button class="btn primary" type="submit"
-              style="width:100%;padding:10px;background:#16a34a;color:white;border:none;border-radius:5px;font-weight:bold;cursor:pointer;transition:background 0.2s;">
-              Бронювати</button>
-          </form>
+              <p class="card-desc">{{ (m.get('description') or 'Опис відсутній')[:80] }}{% if m.get('description') and m.get('description')|length > 80 %}...{% endif %}</p>
+              <div style="margin-top:6px;color:var(--muted);font-size:12px;">{{ m.get('manufacturer_name') or '' }} — {{ m.get('category_name') or '' }}</div>
+            </div>
+            <div class="card-actions" onclick="event.stopPropagation()">
+              {% if m.get('prescription_required') %}
+              <form method="post" action="/bookings/cart/add" style="flex:1;margin:0;">
+                <input type="hidden" name="medicine_id" value="{{ m.get('medicine_id') }}">
+                <input type="hidden" name="quantity" value="1">
+                <button class="btn primary" type="submit" style="width:100%;padding:9px;background:#16a34a;color:white;border:none;border-radius:5px;font-weight:bold;cursor:pointer;font-size:13px;">Бронювати</button>
+              </form>
+              {% else %}
+              <form method="post" action="/cart/add" style="flex:1;margin:0;">
+                <input type="hidden" name="medicine_id" value="{{ m.get('medicine_id') }}">
+                <input type="hidden" name="quantity" value="1">
+                <button class="btn primary" type="submit" style="width:100%;padding:9px;background:#16a34a;color:white;border-radius:5px;border:none;cursor:pointer;font-weight:bold;font-size:13px;">Додати</button>
+              </form>
+              {% endif %}
+              <a class="btn" href="/medicine/{{ m.get('medicine_id') }}" onclick="event.stopPropagation()" style="flex:0.7;padding:9px;background:#e5e7eb;border-radius:5px;text-decoration:none;text-align:center;border:none;cursor:pointer;font-weight:500;font-size:13px;">Деталі</a>
+            </div>
+          </article>
           {% else %}
-          <form method="post" action="/cart/add" style="flex: 1; margin: 0;">
-            <input type="hidden" name="medicine_id" value="{{ m.get('medicine_id') }}">
-            <input type="hidden" name="quantity" value="1">
-            <button class="btn primary" type="submit"
-              style="width: 100%;padding:10px;background:#16a34a;color:white;border-radius:5px;border:none;cursor:pointer;font-weight:bold;transition:background 0.2s;">
-              Додати</button>
-          </form>
-          {% endif %}
-          <a class="btn" href="/medicine/{{ m.get('medicine_id') }}" onclick="event.stopPropagation()"
-            style="flex:0.7;padding:10px;background:#e5e7eb;border-radius:5px;text-decoration:none;text-align:center;border:none;cursor:pointer;font-weight:500;transition:background 0.2s;">Деталі</a>
-        </div>
-      </article>
-      {% else %}
-      <div style="text-align: center; padding: 40px; color: #666;">
-        <h3>Ліки не знайдені</h3>
-        <p>Спробуйте змінити фільтри або пошуковий запит</p>
-      </div>
-      {% endfor %}
-    </section>
-  </main>
+          <div style="text-align:center;padding:40px;color:#666;grid-column:1/-1;">
+            <h3>Ліки не знайдені</h3>
+            <p>Спробуйте змінити фільтри або пошуковий запит</p>
+          </div>
+          {% endfor %}
+        </section>
+      </main>
+    </div>
+  </form>
 </div>
+
+<style>
+@media (max-width: 768px) {
+  .filters-mobile-bar { display: block !important; }
+  .catalog-grid-desktop { display: none !important; }
+  .grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .card-title { font-size: 13px !important; }
+  .card-price { font-size: 15px !important; margin: 4px 0 !important; }
+  .card-desc { font-size: 12px !important; }
+  .card-body { padding: 10px !important; }
+  .card-media { height: 120px !important; }
+  .card-actions { flex-direction: column !important; gap: 4px !important; padding: 8px !important; }
+  .card-actions .btn, .card-actions button { font-size: 12px !important; padding: 7px !important; }
+}
+@media (max-width: 360px) {
+  .grid { grid-template-columns: 1fr !important; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('filter-form');
+  const resultsRoot = document.querySelector('.results .grid');
+
+  // Синхронізація двох наборів інпутів (мобільний + десктоп)
+  const qMobile = document.getElementById('q-input');
+  const qDesktop = document.getElementById('q-input-desktop');
+  const cityMobile = document.getElementById('city-select');
+  const cityDesktop = document.getElementById('city-select-desktop');
+
+  if (qMobile && qDesktop) {
+    qMobile.addEventListener('input', function(){ qDesktop.value = this.value; doSearch(); });
+    qDesktop.addEventListener('input', function(){ qMobile.value = this.value; doSearch(); });
+  }
+  if (cityMobile && cityDesktop) {
+    cityMobile.addEventListener('change', function(){ cityDesktop.value = this.value; doSearch(); });
+    cityDesktop.addEventListener('change', function(){ cityMobile.value = this.value; doSearch(); });
+  }
+
+  async function doSearch() {
+    const params = new URLSearchParams(new FormData(form));
+    const url = '/search?' + params.toString();
+    try {
+      const res = await fetch(url, { headers: { 'Accept': 'text/html' } });
+      if (res.ok) {
+        const html = await res.text();
+        if (resultsRoot) resultsRoot.innerHTML = html;
+        document.querySelectorAll('.card[data-href]').forEach(function (card) {
+          card.addEventListener('click', function () { window.location = card.getAttribute('data-href'); });
+        });
+        if (window.bindCartForms) window.bindCartForms();
+      }
+    } catch (e) { console.warn(e); }
+  }
+
+  form && form.addEventListener('change', function (e) {
+    if (e.target.name === 'q') return;
+    doSearch();
+  });
+  form && form.addEventListener('submit', function (e) {
+    e.preventDefault(); doSearch();
+  });
+
+  // Кнопка "Ще" на мобільному
+  const toggleMore = document.getElementById('toggle-more-filters');
+  const moreFilters = document.getElementById('more-filters-mobile');
+  if (toggleMore && moreFilters) {
+    toggleMore.addEventListener('click', function () {
+      const open = moreFilters.style.display === 'block';
+      moreFilters.style.display = open ? 'none' : 'block';
+      this.textContent = open ? 'Ще ▼' : 'Сховати ▲';
+    });
+  }
+
+  // Десктоп: категорії/виробники
+  ['toggle-categories', 'toggle-manufacturers'].forEach(function(id) {
+    const btn = document.getElementById(id);
+    const content = document.getElementById(id.replace('toggle-', '') + '-content');
+    if (btn && content) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const open = content.style.display === 'block';
+        content.style.display = open ? 'none' : 'block';
+        this.querySelector('span').textContent = open ? '▼' : '▲';
+      });
+    }
+  });
+
+  document.querySelectorAll('.card[data-href]').forEach(function (card) {
+    card.addEventListener('click', function () { window.location = card.getAttribute('data-href'); });
+  });
+});
+</script>
 
 <script>
   // ФІЛЬТРАЦІЯ В РЕАЛЬНОМУ ЧАСІ
