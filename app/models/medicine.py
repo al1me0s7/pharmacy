@@ -1,11 +1,9 @@
 from app.models.database import Database
 
-# для роботи з ліками
 class Medicine:
     @staticmethod
-    # CRUD: Пошук ліків з фільтрами та сортуванням
     def search(query=None, category=None, manufacturer=None, prescription=None, sort='name', city=None):
-        base_sql = '''SELECT DISTINCT m.*, c.category_name, mf.manufacturer_name, 
+        base_sql = '''SELECT m.*, c.category_name, mf.manufacturer_name, 
                              COALESCE(AVG(r.rating), 0) as avg_rating,
                              COUNT(r.review_id) as review_count
                       FROM medicines m 
@@ -14,7 +12,7 @@ class Medicine:
                       LEFT JOIN reviews r ON m.medicine_id=r.medicine_id'''
         where = []
         params = []
-        # Фільтрація за містом (при наявності)
+
         if city not in (None, "", "None"):
             base_sql += '''
             JOIN inventory i ON i.medicine_id = m.medicine_id
@@ -23,7 +21,6 @@ class Medicine:
             where.append('p.city_id = %s')
             params.append(int(city))
 
-        # Додаткові фільтри
         if query:
             where.append("(m.name ILIKE %s OR mf.manufacturer_name ILIKE %s OR m.active_substance ILIKE %s)")
             params.extend([f'%{query}%', f'%{query}%', f'%{query}%'])
@@ -41,19 +38,28 @@ class Medicine:
             base_sql += ' WHERE ' + ' AND '.join(where)
 
         base_sql += '''
-        GROUP BY 
-        m.medicine_id,
-        m.name,
-        m.description,
-        m.price,
-        m.prescription_required,
-        m.active_substance,
-        m.category_id,
-        m.manufacturer_id,
-        c.category_name,
-        mf.manufacturer_name
-        '''
-        # Сортування
+GROUP BY 
+    m.medicine_id,
+    m.manufacturer_id,
+    m.category_id,
+    m.name,
+    m.description,
+    m.active_substance,
+    m.dosage_form,
+    m.dosage_value,
+    m.price,
+    m.quantity_in_stock,
+    m.expiration_date,
+    m.prescription_required,
+    m.contraindications,
+    m.storage_conditions,
+    m.date_added,
+    m.image,
+    m.composition,
+    m.usage_instructions,
+    c.category_name,
+    mf.manufacturer_name
+'''
         if sort == 'price_asc':
             base_sql += ' ORDER BY m.price ASC'
         elif sort == 'price_desc':
@@ -64,8 +70,7 @@ class Medicine:
             base_sql += ' ORDER BY m.name'
 
         return Database.fetchall(base_sql, tuple(params) if params else None)
-   
-    # CRUD: Знайти ліки за ID
+
     @staticmethod
     def get_by_id(medicine_id):
         return Database.fetchone(
@@ -76,8 +81,7 @@ class Medicine:
                GROUP BY m.medicine_id''',
             (medicine_id,)
         )
-    
-    # CRUD: Знайти ліки за списком ID
+
     @staticmethod
     def get_by_ids(ids):
         if len(ids) == 1:
