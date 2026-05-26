@@ -40,7 +40,21 @@ class Medicine:
         if where:
             base_sql += ' WHERE ' + ' AND '.join(where)
 
-        base_sql += ' GROUP BY m.medicine_id, c.category_name, mf.manufacturer_name'
+        base_sql += '''
+        GROUP BY 
+        m.medicine_id,
+        m.name,
+        m.description,
+        m.price,
+        m.stock_quantity,
+        m.image_url,
+        m.prescription_required,
+        m.active_substance,
+        m.category_id,
+        m.manufacturer_id,
+        c.category_name,
+        mf.manufacturer_name
+        '''
         # Сортування
         if sort == 'price_asc':
             base_sql += ' ORDER BY m.price ASC'
