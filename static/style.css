@@ -573,17 +573,6 @@ body {
   animation: fadeIn 0.4s ease;
 }
 
-@media (max-width: 768px) {
-  .product-detail,
-  .profile,
-  .checkout-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .header-inner {
-    flex-wrap: wrap;
-  }
-}
 
 .auth-page {
   display:flex;
@@ -601,35 +590,216 @@ body {
 }
 .auth-card h2{ text-align:center; margin-bottom:16px }
 .auth-card .form-actions{ justify-content:center }
-@media (max-width: 600px) {
-  body, .container {
-    padding: 8px !important;
-    margin: 0 !important;
-    width: 100% !important;
-    box-sizing: border-box;
+
+@media (max-width: 900px) {
+  .catalog-grid {
+    grid-template-columns: 1fr;
   }
-  .header-inner, .main-nav, .site-footer, .product-detail, .cart-table, .form-row {
-    flex-direction: column !important;
-    display: block !important;
-    width: 100% !important;
-    min-width: 0 !important;
+  .filters {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header-inner {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .main-nav {
+    order: 3;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .main-nav a {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+
+  .logo {
+    flex: 1;
+  }
+
+  .product-detail,
+  .profile,
+  .checkout-grid,
+  .catalog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-detail {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .product-detail .info h1 {
+    font-size: 22px;
+  }
+
+  .product-detail .info .price {
+    font-size: 24px;
+  }
+
+  .product-detail .info .actions {
+    flex-direction: column;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .card-title {
+    font-size: 15px;
+  }
+
+  .card-price {
+    font-size: 17px;
+  }
+
+  .card-media {
+    height: 140px;
+  }
+
+  .card-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .card-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .hero {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .hero h2 {
+    font-size: 22px;
+  }
+
+  .cart-table {
+    display: block;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  table, thead, tbody, th, td, tr {
-    display: block !important;
-    width: 100% !important;
+
+  .cart-table thead {
+    display: none;
   }
-  .cart-table th, .cart-table td {
-    text-align: left !important;
-    padding: 8px 4px !important;
+
+  .cart-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e6e9ef;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: #fff;
   }
-  .btn, .primary, input, select, textarea {
-    width: 100% !important;
-    box-sizing: border-box;
-    margin-bottom: 10px;
+
+  .cart-table td {
+    border: none;
+    padding: 4px 0;
+    text-align: left;
   }
-  img {
-    max-width: 100% !important;
-    height: auto !important;
+
+  .cart-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #374151;
+    display: block;
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+
+  .profile {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-card,
+  .list,
+  .form-card {
+    padding: 16px;
+  }
+
+  .order-item,
+  .booking-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .order-actions,
+  .booking-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .order-actions .btn,
+  .booking-actions .btn {
+    flex: 1;
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .form-card input,
+  .form-card select,
+  .form-card textarea {
+    font-size: 16px; /* предотвращает зум на iOS */
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .auth-card {
+    width: 100%;
+    margin: 16px;
+    padding: 20px;
+  }
+
+  .success-card {
+    margin: 16px;
+    padding: 20px;
+  }
+
+  .btn {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .flashes li {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h2 {
+    font-size: 18px;
+  }
+
+  .main-nav a {
+    font-size: 13px;
+    padding: 5px 8px;
   }
 }
