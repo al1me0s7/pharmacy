@@ -46,8 +46,6 @@ class Medicine:
         m.name,
         m.description,
         m.price,
-        m.stock_quantity,
-        m.image_url,
         m.prescription_required,
         m.active_substance,
         m.category_id,
