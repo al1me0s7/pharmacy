@@ -251,6 +251,113 @@
 
   .auth-box h2 { color: #1e3b2a; margin-bottom: 10px; }
   .auth-box h1 { color: #fff; margin-bottom: 10px; font-size: 28px; line-height: 1.2; }
+
+  @media (max-width: 768px) {
+  .auth-wrapper {
+    padding: 16px;
+    min-height: unset;
+    align-items: flex-start;
+  }
+
+  .auth-box {
+    width: 100%;
+    border-radius: 16px;
+    min-height: 520px;
+  }
+
+  .sign-in, .sign-up {
+    width: 100% !important;
+    left: 0 !important;
+  }
+
+  .toggle-container {
+    position: static !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 70px !important;
+    border-radius: 16px 16px 0 0 !important;
+    overflow: hidden !important;
+  }
+
+  .auth-box.active .toggle-container {
+    transform: none !important;
+    border-radius: 16px 16px 0 0 !important;
+  }
+
+  .toggle {
+    left: 0 !important;
+    width: 100% !important;
+    height: 70px !important;
+    display: flex !important;
+    transform: translateX(0) !important;
+  }
+
+  .auth-box.active .toggle {
+    transform: translateX(-50%) !important;
+  }
+
+  .toggle-panel {
+    width: 50% !important;
+    height: 70px !important;
+    padding: 0 10px !important;
+    flex-direction: row !important;
+    gap: 10px;
+  }
+
+  .toggle-panel h1 { display: none; }
+  .toggle-panel p { margin: 0 !important; font-size: 13px !important; }
+
+  .toggle-panel button.ghost {
+    padding: 8px 16px !important;
+    margin: 0 !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+  }
+
+  .toggle-left { transform: translateX(0) !important; }
+  .auth-box.active .toggle-left { transform: translateX(0) !important; }
+  .toggle-right { transform: translateX(0) !important; }
+  .auth-box.active .toggle-right { transform: translateX(0) !important; }
+
+  .form-container {
+    top: 70px !important;
+    height: calc(100% - 70px) !important;
+  }
+
+  .auth-box.active .sign-in {
+    transform: translateX(100%) !important;
+  }
+
+  .auth-box.active .sign-up {
+    transform: translateX(100%) !important;
+    opacity: 1 !important;
+    z-index: 5 !important;
+  }
+
+  .auth-box form {
+    padding: 20px 24px !important;
+    height: 100% !important;
+    justify-content: flex-start !important;
+    padding-top: 30px !important;
+  }
+
+  .auth-box input {
+    margin: 6px 0 !important;
+    font-size: 15px !important;
+    padding: 12px 15px !important;
+  }
+
+  .auth-box button[type="submit"] {
+    width: 100% !important;
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+
+  .auth-box h2 {
+    font-size: 22px !important;
+    margin-bottom: 16px !important;
+  }
+}
 </style>
 
 <script>
