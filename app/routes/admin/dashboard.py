@@ -79,8 +79,18 @@ def admin_stats():
     if stat_type == 'orders':
         # Статистика по замовленнях
         orders = Database.fetchall(
-            'SELECT o.*, COUNT(om.medicine_id) as items_count FROM orders o LEFT JOIN order_medicine om ON o.order_id = om.order_id WHERE DATE(o.order_date) >= %s AND DATE(o.order_date) <= %s GROUP BY o.order_id ORDER BY o.order_date DESC',
-            (date_from, date_to)
+    '''SELECT o.order_id, o.user_id, o.order_date, o.delivery_address, o.delivery_method,
+              o.delivery_status, o.total_sum, o.comment, o.pdf_receipt_path, o.created_at,
+              o.pharmacy_id, o.status_last_updated, o.payment_method, o.city_name, o.status,
+              COUNT(om.medicine_id) as items_count
+       FROM orders o
+       LEFT JOIN order_medicine om ON o.order_id = om.order_id
+       WHERE DATE(o.order_date) >= %s AND DATE(o.order_date) <= %s
+       GROUP BY o.order_id, o.user_id, o.order_date, o.delivery_address, o.delivery_method,
+                o.delivery_status, o.total_sum, o.comment, o.pdf_receipt_path, o.created_at,
+                o.pharmacy_id, o.status_last_updated, o.payment_method, o.city_name, o.status
+       ORDER BY o.order_date DESC''',
+    (date_from, date_to)
         )
         orders_enriched = []
         for o in orders:
