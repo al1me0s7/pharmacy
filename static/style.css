@@ -601,3 +601,35 @@ body {
 }
 .auth-card h2{ text-align:center; margin-bottom:16px }
 .auth-card .form-actions{ justify-content:center }
+@media (max-width: 600px) {
+  body, .container {
+    padding: 8px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+  .header-inner, .main-nav, .site-footer, .product-detail, .cart-table, .form-row {
+    flex-direction: column !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto;
+  }
+  table, thead, tbody, th, td, tr {
+    display: block !important;
+    width: 100% !important;
+  }
+  .cart-table th, .cart-table td {
+    text-align: left !important;
+    padding: 8px 4px !important;
+  }
+  .btn, .primary, input, select, textarea {
+    width: 100% !important;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}
