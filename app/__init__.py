@@ -3,14 +3,13 @@ from app.config import Config
 from app.routes import register_routes
 from app.utils.helpers import get_current_user, get_cart_items, translate_order_status, translate_delivery_method
 
-# Функція для створення Фласк-додатку
+# функція для створення фласк-додатку
 def create_app():
     app = Flask(__name__, template_folder='../templates', static_folder='../static')
     app.config.from_object(Config)
 
     register_routes(app)
 
-    # Глобальні змінні для шаблонів
     @app.context_processor
     def inject_globals():
         user = get_current_user()
@@ -24,7 +23,7 @@ def create_app():
             'translate_delivery_method': translate_delivery_method
         }
 
-    # Обробник 404
+    #  404
     from flask import render_template
     @app.errorhandler(404)
     def page_not_found(e):

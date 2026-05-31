@@ -1,9 +1,26 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from app.models import Medicine, Category, Manufacturer, City, Statistics, Database, Pharmacy
 from app.utils.helpers import get_current_user
+from app.models.page import Page, MainPage, MedicinePage, CartPage, ProfilePage
 
 bp = Blueprint('main', __name__)
-# CRUD: Відобразити - головна сторінка
+
+# ООП
+@bp.route('/oop-demo')
+def oop_demo():
+    pages = [
+        MainPage(),
+        MedicinePage("Нурофен"),
+        CartPage(),
+        ProfilePage("Марія")
+    ]
+    medicines = [
+        Medicine("Нурофен", 89.50, "Знеболювальне", False),
+        Medicine("Амоксицилін", 145.00, "Антибіотик", True),
+        Medicine("Вітамін C", 55.00, "Вітамін", False),
+    ]
+    return render_template('oop_demo.html', pages=pages, medicines=medicines)
+
 @bp.route('/')
 def index():
     q = request.args.get('q', '').strip()
@@ -81,35 +98,39 @@ def search():
     sort = request.args.get('sort', 'name')
     min_price = request.args.get('min_price')
     max_price = request.args.get('max_price')
-    
-    meds = Medicine.search(query=q, category=None, 
-                          manufacturer=None, 
-                          prescription=prescription, sort=sort, 
-                          city=city_id if city_id else None)
-    
-    if categories:
+
+    # ВОТ ТУТ БЫЛА ПРОБЛЕМА — передаём category и manufacturer в SQL
+    meds = Medicine.search(
+        query=q,
+        category=categories[0] if len(categories) == 1 else None,
+        manufacturer=manufacturers[0] if len(manufacturers) == 1 else None,
+        prescription=prescription,
+        sort=sort,
+        city=city_id if city_id else None
+    )
+
+    # фільтрація Python-ом для множинного вибору
+    if categories and len(categories) > 1:
         cat_ids = [int(c) for c in categories if c.isdigit()]
         if cat_ids:
             meds = [m for m in meds if m.get('category_id') in cat_ids]
-    
-    if manufacturers:
+
+    if manufacturers and len(manufacturers) > 1:
         mf_ids = [int(m) for m in manufacturers if m.isdigit()]
         if mf_ids:
             meds = [m for m in meds if m.get('manufacturer_id') in mf_ids]
-    
+
     if min_price:
         try:
-            min_p = float(min_price)
-            meds = [m for m in meds if m.get('price', 0) >= min_p]
+            meds = [m for m in meds if m.get('price', 0) >= float(min_price)]
         except:
             pass
     if max_price:
         try:
-            max_p = float(max_price)
-            meds = [m for m in meds if m.get('price', 0) <= max_p]
+            meds = [m for m in meds if m.get('price', 0) <= float(max_price)]
         except:
             pass
-    
+
     return render_template('partials/cards.html', meds=meds)
 # CRUD: Відобразити - деталі ліків
 @bp.route('/medicine/<int:mid>')

@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div style="max-width:1100px;margin:auto;">
+
+  <!-- верх -->
+  <div style="
+      background:linear-gradient(135deg,#16a34a,#22c55e);
+      color:white;
+      padding:32px;
+      border-radius:18px;
+      margin-bottom:28px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  ">
+    <h1 style="margin:0 0 10px 0;font-size:32px;">
+      Аптека
+    </h1>
+
+    <p style="margin:0;font-size:16px;opacity:0.95;">
+      Демонстрація роботи сторінок сайту та об’єктно-орієнтованого програмування
+    </p>
+  </div>
+
+  <!-- сторінки -->
+  <h2 style="margin-bottom:18px;color:#111827;">
+    Сторінки системи
+  </h2>
+
+  <div style="
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:18px;
+      margin-bottom:40px;
+  ">
+
+    {% for p in pages %}
+    <div style="
+        background:white;
+        border-radius:16px;
+        padding:20px;
+        box-shadow:0 2px 10px rgba(0,0,0,0.06);
+        border:1px solid #e5e7eb;
+    ">
+
+      <div style="
+          width:48px;
+          height:48px;
+          border-radius:12px;
+          background:#dcfce7;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          font-size:22px;
+          margin-bottom:16px;
+      ">
+        {% if 'MainPage' in p.__class__.__name__ %}
+          🏥
+        {% elif 'MedicinePage' in p.__class__.__name__ %}
+          💊
+        {% elif 'CartPage' in p.__class__.__name__ %}
+          🛒
+        {% else %}
+          👤
+        {% endif %}
+      </div>
+
+      <h3 style="margin:0 0 10px 0;color:#16a34a;">
+        {{ p.get_title() }}
+      </h3>
+
+      <p style="
+          color:#4b5563;
+          line-height:1.5;
+          margin-bottom:16px;
+      ">
+        {{ p.show_content() }}
+      </p>
+
+      <div style="
+          font-size:13px;
+          color:#9ca3af;
+          border-top:1px solid #f3f4f6;
+          padding-top:10px;
+      ">
+        {{ p.show_footer() }}
+      </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <!-- препарати -->
+  <h2 style="margin-bottom:18px;color:#111827;">
+    Популярні препарати
+  </h2>
+
+  <div style="
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:18px;
+  ">
+
+    {% for m in medicines %}
+    <div style="
+        background:white;
+        border-radius:16px;
+        padding:22px;
+        border:1px solid #e5e7eb;
+        box-shadow:0 2px 10px rgba(0,0,0,0.05);
+    ">
+
+      <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:flex-start;
+          margin-bottom:16px;
+      ">
+
+        <div>
+          <h3 style="margin:0 0 6px 0;color:#111827;">
+            {{ m.name }}
+          </h3>
+
+          <div style="
+              font-size:14px;
+              color:#6b7280;
+          ">
+            {{ m.category }}
+          </div>
+        </div>
+
+        <div style="
+            background:#dcfce7;
+            color:#16a34a;
+            padding:6px 12px;
+            border-radius:999px;
+            font-weight:bold;
+            font-size:14px;
+        ">
+          {{ m.price }} грн
+        </div>
+
+      </div>
+
+      <div style="
+          color:#374151;
+          margin-bottom:16px;
+          line-height:1.5;
+      ">
+        {{ m.get_info() }}
+      </div>
+
+      {% if m.is_available() %}
+      <div style="
+          color:#16a34a;
+          font-weight:600;
+      ">
+        ✓ Є в наявності
+      </div>
+      {% else %}
+      <div style="
+          color:#ef4444;
+          font-weight:600;
+      ">
+        ✗ Немає в наявності
+      </div>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+</div>
+
+{% endblock %}
